@@ -29,9 +29,9 @@
             currentIndex = seekToIndex,
             pages,
             totalPages,
-            pageWidth, // in the case of vertical slider, this holds the pageHeight instead
             seek,
             slide,
+            getNewPosition,
             prevClick,
             nextClick,
             setCallback,
@@ -61,7 +61,6 @@
             pages = pageHolder.children();
         }
 
-        pageWidth = options.vertical ? pages.first().outerHeight() : pages.first().outerWidth();
         totalPages = Math.ceil(pages.length / options.itemsPerPage);
 
         beforeSlide = function () {
@@ -88,45 +87,40 @@
             }
         }
 
-        slide = function () {
-            var newPosition,
-                cssObject;
+        getNewPosition = function() {
+            var offset = pages.eq(seekToIndex * options.itemsPerPage).position(),
+                css = {};
 
-            newPosition = seekToIndex * options.itemsPerPage * -pageWidth;
-            if (options.cssProperty === 'position') {
-                if (options.vertical) {
-                    cssObject = {
-                        top: newPosition
-                    };
-                } else {
-                    cssObject = {
-                        left: newPosition
-                    };  
-                }
-            } else if (options.cssProperty === 'transform') {
-                if (options.vertical) {
-                    cssObject = {
-                        '-webkit-transform': 'translate(0, ' + newPosition + 'px)',
-                        '-moz-transform': 'translate(0, ' + newPosition + 'px)',
-                        '-ms-transform': 'translate(0, ' + newPosition + 'px)',
-                        '-o-transform': 'translate(0, ' + newPosition + 'px)',
-                        'transform': 'translate(0, ' + newPosition + 'px)'
-                    };
-                } else {
-                    cssObject = {
-                        '-webkit-transform': 'translate(' + newPosition + 'px, 0)',
-                        '-moz-transform': 'translate(' + newPosition + 'px, 0)',
-                        '-ms-transform': 'translate(' + newPosition + 'px, 0)',
-                        '-o-transform': 'translate(' + newPosition + 'px, 0)',
-                        'transform': 'translate(' + newPosition + 'px, 0)'
-                    };
-                }
+            if (options.vertical) {
+                css.top = -offset.top;
+            } else {
+                css.left = -offset.left;
+            }
+
+            return css;
+        }
+
+        slide = function () {
+            var css = getNewPosition();
+
+            if (options.cssProperty === 'transform') {
+                css = $.extend({
+                    top: 0,
+                    left: 0
+                }, css);
+                css = {
+                    '-webkit-transform': 'translate(' + css.left + 'px, ' + css.top + 'px)',
+                    '-moz-transform': 'translate(' + css.left + 'px, ' + css.top + 'px)',
+                    '-ms-transform': 'translate(' + css.left + 'px, ' + css.top + 'px)',
+                    '-o-transform': 'translate(' + css.left + 'px, ' + css.top + 'px)',
+                    'transform': 'translate(' + css.left + 'px, ' + css.top + 'px)'
+                };
             }
 
             if (options.animation && options.cssProperty !== 'transform') {
-                !pageHolder.queue('fx').length && pageHolder.animate(cssObject, options.slideSpeed, options.easing, afterSlide); 
+                !pageHolder.queue('fx').length && pageHolder.animate(css, options.slideSpeed, options.easing, afterSlide); 
             } else {
-                pageHolder.css(cssObject);
+                pageHolder.css(css);
                 afterSlide();
             }
         }
@@ -217,21 +211,8 @@
             getPageHolder: function () {
                 return pageHolder;
             },
-            getPageWidth: function () {
-                return pageWidth;
-            },
-            getSlidePageWidth: function () {
-                return pageWidth * options.itemsPerPage;
-            },
             getOptions: function () {
                 return options;
-            },
-            updatePageWidth: function(width) {
-                if (typeof width === 'undefined') {
-                    width = options.vertical ? pages.first().outerHeight() : pages.first().outerWidth();
-                }
-                pageWidth = width;
-                slide();
             },
             beforeSlide: function (callback) {
                 if (typeof callback === 'undefined') {
@@ -246,10 +227,6 @@
                 setCallback('afterSlide', callback);
             }
         };
-
-        exposedMethods.getPageHeight = exposedMethods.getPageWidth;
-        exposedMethods.getSlidePageHeight = exposedMethods.getSlidePageWidth;
-        exposedMethods.updatePageHeight = exposedMethods.updatePageWidth;
 
         prev.length && prev.on('click.aslider', prevClick);
         next.length && next.on('click.aslider', nextClick);
