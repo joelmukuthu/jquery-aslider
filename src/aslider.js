@@ -18,7 +18,7 @@
                 animation: true, // whether to use $.animate or simply set the css property
                 easing: 'swing', // $.animate easing
                 vertical: false, // up/down vs left/right slider
-                cssProperty: 'position', // currently supported: 'position' and 'transform'. note that $().animate won't animate 'transform' property so for that set 'animation' to false and use CSS transitions instead
+                property: 'position', // currently supported: 'position' and 'transform'. if set to 'transform', the plugin will not animate the slide so use css transitions instead
                 keys: true // whether or not it can be controlled by keyboard arrows
             }, opts),
             slider = this,
@@ -67,8 +67,9 @@
             var returnValue;
             if (options.beforeSlide) {
                 returnValue = options.beforeSlide.call(exposedMethods, seekToIndex);
+                return returnValue === false ? false : true;
             }
-            return returnValue === false ? false : true;
+            return true;
         }
 
         afterSlide = function () {
@@ -103,7 +104,7 @@
         slide = function () {
             var css = getNewPosition();
 
-            if (options.cssProperty === 'transform') {
+            if (options.property === 'transform') {
                 css = $.extend({
                     top: 0,
                     left: 0
@@ -117,7 +118,7 @@
                 };
             }
 
-            if (options.animation && options.cssProperty !== 'transform') {
+            if (options.animation && options.property !== 'transform') {
                 !pageHolder.queue('fx').length && pageHolder.animate(css, options.slideSpeed, options.easing, afterSlide); 
             } else {
                 pageHolder.css(css);

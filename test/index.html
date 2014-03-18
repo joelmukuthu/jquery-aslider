@@ -27,37 +27,13 @@
         <script src="../src/aslider.js"></script>
         <script>
             $(function () {
-                var direction = 'right',
-                    alreadSeeked;
                 $('#slider').aslider({
-                    cssProperty: 'transform',
+                    property: 'transform',
                     beforeSlide: function (seekToIndex) {
-                        var pages = this.getPages(),
-                            currentIndex = this.getCurrentIndex();
-                        console.log(currentIndex, seekToIndex, direction)
-                        switch (seekToIndex) {
-                            case 0:
-                                direction = 'right';
-                                return true;
-                            break;
-
-                            case pages.length - 1:
-                                direction = 'left';
-                                return true;
-                            break;
-                        }
-                        switch (direction) {
-                            case 'left':
-                                return true;
-                            break;
-
-                            case 'right':
-                                return true;
-                            break;
-                        }
+                        console.log('index before slide:', seekToIndex);
                     },
                     afterSlide: function (currentIndex) {
-                        console.log('index after slide: ' + currentIndex);
+                        console.log('index after slide:', currentIndex);
                     }
                 });
             });
