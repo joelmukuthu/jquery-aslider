@@ -8,20 +8,23 @@
             #slider li { float: left; width: 600px; height: 200px; }
             #slider li:nth-child(odd) { background: #F6F4F0; }
             #slider li:nth-child(even) { background: #cdcdcd; }
-            #slider .disabled { color: silver; }
+            #slider .ctrls { position: absolute; bottom: 0; width: 580px; margin: 0.5em 10px; }
+            #slider .prev { float: left; }
+            #slider .next { float: right; }
+            #slider .disabled { color: silver; cursor: default; }
         </style>
     </head>
     <body>
         <div id="slider">
-            <p>
-                <a class="prev" href="#">Prev</a>
-                <a class="next" href="#">Next</a>
-            </p>
             <ul class="pages">
                 <li>one</li>
                 <li>two</li>
                 <li>three</li>
             </ul>
+            <p class="ctrls">
+                <a class="prev" href="#">Prev</a>
+                <a class="next" href="#">Next</a>
+            </p>
         </div>
         <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
         <script src="../src/aslider.js"></script>
@@ -29,6 +32,7 @@
             $(function () {
                 $('#slider').aslider({
                     property: 'transform',
+                    disabledClass: 'disabled',
                     beforeSlide: function (seekToIndex) {
                         console.log('index before slide:', seekToIndex);
                     },
