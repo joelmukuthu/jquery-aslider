@@ -118,7 +118,12 @@
                 };
             }
 
-            if (options.animation && options.property !== 'transform') {
+            if (options.property === 'transform') {
+                pageHolder
+                    .css(css)
+                    .one('webkitTransitionEnd otransitionend oTransitionEnd MSTransitionEnd transitionend', afterSlide);
+
+            } else if (options.animation) {
                 !pageHolder.queue('fx').length && pageHolder.animate(css, options.slideSpeed, options.easing, afterSlide); 
             } else {
                 pageHolder.css(css);
