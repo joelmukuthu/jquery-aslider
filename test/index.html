@@ -37,11 +37,12 @@
                 <a class="next" href="#">Next</a>
             </p>
         </div>
-        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
         <script src="../jquery.aslider.js"></script>
         <script>
             $(function () {
-                $('.slider').aslider({
+                var sliders = $('.slider');
+                sliders.aslider({
                     property: 'transform',
                     disabledClass: 'disabled',
                     beforeSlide: function (seekToIndex) {
@@ -50,9 +51,14 @@
                     afterSlide: function (currentIndex) {
                         console.log('index after slide:', currentIndex);
                     }
-                }).first().data('aslider').next(function (index) {
-                    console.log('this callback is executed instead of regular afterSlide.. index after slide is', index);
                 });
+                var api = sliders
+                    .first()
+                    .data('aslider')
+                    .next(function (index) {
+                        console.log('this callback is executed instead of regular afterSlide.. index after slide is', index);
+                });
+                console.log('version is', api.getVersion());
             });
         </script>
     </body>

@@ -1,3 +1,11 @@
+/**
+ * aslider plugin for jQuery
+ *
+ * github.com/joelmukuthu/aslider
+ *
+ * version: 1.0
+ *
+ **/
 (function ($) {
 
     'use strict';
@@ -307,6 +315,9 @@
                 if (exposedMethodsDisabled)
                     return null;
                 return options;
+            },
+            getVersion: function () {
+                return '1.0';
             },
             beforeSlide: function (callback) {
                 if (exposedMethodsDisabled)
