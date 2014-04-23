@@ -20,7 +20,7 @@
                 slideSpeed: 400,
                 initialIndex: 0,
                 behaviourAtEdge: 'none', // 'reset', 'none'
-                disabledClass: '', // may also be null or empty string,
+                disabledClass: 'disabled', // may also be null or empty string,
                 beforeSlide: null, // passed the index being seeked to as param
                 afterSlide: null, // passed currentIndex as param
                 animation: true, // whether to use $.animate or simply set the css property
