@@ -75,12 +75,20 @@
 
         getNewPosition = function (index) {
             var offset = pages.eq(index * options.itemsPerPage).position(),
-                css = {};
+                top = offset.top,
+                left = offset.left,
+                css = {},
+                width,
+                height;
 
             if (options.vertical) {
-                css.top = -offset.top;
+                height = pageHolder.height();
+                top = height === 0 ? 0 : (top / height * 100);
+                css.top = '-' + top + '%';
             } else {
-                css.left = -offset.left;
+                width = pageHolder.width();
+                left = width === 0 ? 0 : (left / width * 100);
+                css.left = '-' + left + '%';
             }
 
             return css;
@@ -109,7 +117,7 @@
                     left: 0
                 }, css);
                 css = {
-                    'transform': 'translate(' + css.left + 'px, ' + css.top + 'px)'
+                    'transform': 'translate(' + css.left + ', ' + css.top + ')'
                 };
                 pageHolder
                     .css(css)
