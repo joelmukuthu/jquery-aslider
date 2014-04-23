@@ -14,7 +14,7 @@
         var options = $.extend({
                 next: '.next', // also accepts a jQuery object
                 prev: '.prev', // also accepts a jQuery object
-                pageHolder: '.pages', // element whose children (or specified by selector) are the actual pages, also accepts a jQuery object
+                pageHolder: '> ul', // element whose children (or specified by selector) are the actual pages, also accepts a jQuery object
                 pageSelector: null, // if null, children of pageHolder are assumed to be the pages. if not, the selector is applied on pageHolder
                 itemsPerPage: 1,
                 slideSpeed: 400,
