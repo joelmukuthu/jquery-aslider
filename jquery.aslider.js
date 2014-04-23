@@ -1,7 +1,8 @@
-// slider plugin
 (function ($) {
+
     'use strict';
-    $.fn.aslider = function (opts) {
+
+    var aslider = function (elem, opts) {
         var options = $.extend({
                 next: '.next', // also accepts a jQuery object
                 prev: '.prev', // also accepts a jQuery object
@@ -20,7 +21,6 @@
                 property: 'position', // currently supported: 'position' and 'transform'. if set to 'transform', the plugin will not animate the slide so use css transitions instead
                 keys: true // whether or not it can be controlled by keyboard arrows
             }, opts),
-            slider = this,
             pageHolder = options.pageHolder,
             next = options.next,
             prev = options.prev,
@@ -248,26 +248,26 @@
                     || alsoDisableExposedMethods === true) {
                     exposedMethodsDisabled = true;
                 }
-                if (!slider.data('aslider'))
+                if (!elem.data('aslider'))
                     return;
                 unbindEvents();
-                slider.data('aslider', false);
+                elem.data('aslider', false);
             },
             on: function (alsoEnableExposedMethods) {
                 if (alsoEnableExposedMethods === undefined
                     || alsoEnableExposedMethods === true) {
                     exposedMethodsDisabled = false;
                 }
-                if (slider.data('aslider'))
+                if (elem.data('aslider'))
                     return;
                 bindEvents();
-                slider.data('aslider', this);
+                elem.data('aslider', this);
             },
             isOn: function () {
-                return !!slider.data('aslider');
+                return !!elem.data('aslider');
             },
             isOff: function () {
-                return !slider.data('aslider');
+                return !elem.data('aslider');
             },
             methodsEnabled: function () {
                 return !exposedMethodsDisabled;
@@ -326,9 +326,9 @@
         setCallback('beforeSlide', options.beforeSlide);
         setCallback('afterSlide', options.afterSlide);
 
-        typeof pageHolder !== 'jQuery' && (pageHolder = slider.find(options.pageHolder));
-        typeof next !== 'jQuery' && (next = slider.find(options.next));
-        typeof prev !== 'jQuery' && (prev = slider.find(options.prev));
+        typeof pageHolder !== 'jQuery' && (pageHolder = elem.find(options.pageHolder));
+        typeof next !== 'jQuery' && (next = elem.find(options.next));
+        typeof prev !== 'jQuery' && (prev = elem.find(options.prev));
 
         if (options.pageSelector) {
             pages = pageHolder.find(options.pageSelector);
@@ -340,13 +340,18 @@
 
         bindEvents();
 
-        slider.data('aslider', exposedMethods);
+        elem.data('aslider', exposedMethods);
 
         options.initialIndex = parseInt(options.initialIndex);
         if (options.initialIndex % 1 === 0 && options.initialIndex >= 0 && options.initialIndex < totalPages) { // if is int and is valid
             seek(options.initialIndex);
         }
-
-        return slider; // allow jQuery chaining
     }
+
+    $.fn.aslider = function(opts) {
+        return this.each(function () {
+            aslider($(this), opts);
+        });
+    }
+
 }(jQuery));
