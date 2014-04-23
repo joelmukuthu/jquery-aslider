@@ -40,8 +40,8 @@
                         console.log('index after slide:', currentIndex);
                     }
                 }).data('aslider');
-                slider.next(function () {
-                    console.log('this callback is executed instead of regular afterSlide');
+                slider.next(function (index) {
+                    console.log('this callback is executed instead of regular afterSlide.. index after slide is', index);
                 });
             });
         </script>

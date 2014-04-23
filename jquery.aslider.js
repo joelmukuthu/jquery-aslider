@@ -12,7 +12,7 @@
                 initialIndex: 0,
                 behaviourAtEdge: 'none', // 'reset', 'none'
                 disabledClass: '', // may also be null or empty string,
-                beforeSlide: null, // passed seekToIndex as param
+                beforeSlide: null, // passed the index being seeked to as param
                 afterSlide: null, // passed currentIndex as param
                 animation: true, // whether to use $.animate or simply set the css property
                 easing: 'swing', // $.animate easing
@@ -24,8 +24,7 @@
             pageHolder = options.pageHolder,
             next = options.next,
             prev = options.prev,
-            seekToIndex = 0,
-            currentIndex = seekToIndex,
+            currentIndex = 0,
             pages,
             totalPages,
             seek,
@@ -39,6 +38,7 @@
             bindEvents,
             unbindEvents,
             exposedMethods,
+            busy = false,
             exposedMethodsDisabled = false;
 
         setCallback = function (key, callback) {
@@ -49,17 +49,16 @@
             }
         }
 
-        beforeSlide = function () {
+        beforeSlide = function (index) {
             var returnValue;
             if (options.beforeSlide) {
-                returnValue = options.beforeSlide.call(exposedMethods, seekToIndex);
+                returnValue = options.beforeSlide.call(exposedMethods, index);
                 return returnValue === false ? false : true;
             }
             return true;
         }
 
         afterSlide = function () {
-            currentIndex = seekToIndex;
             if (options.disabledClass && options.behaviourAtEdge === 'none') {
                 prev.add(next).removeClass(options.disabledClass);
                 if (currentIndex === 0) {
@@ -74,8 +73,8 @@
             }
         }
 
-        getNewPosition = function() {
-            var offset = pages.eq(seekToIndex * options.itemsPerPage).position(),
+        getNewPosition = function (index) {
+            var offset = pages.eq(index * options.itemsPerPage).position(),
                 css = {};
 
             if (options.vertical) {
@@ -87,16 +86,22 @@
             return css;
         }
 
-        slide = function (callback) {
-            var css = getNewPosition();
+        slide = function (index, callback) {
+            var css = getNewPosition(index);
 
             function executeCallback() {
+
+                busy = false;
+                currentIndex = index;
+
                 if ($.isFunction(callback)) {
-                    callback.call(exposedMethods);
+                    callback.call(exposedMethods, currentIndex);
                 } else {
-                    afterSlide()
+                    afterSlide();
                 }
             }
+
+            busy = true;
 
             if (options.property === 'transform') {
                 css = $.extend({
@@ -106,7 +111,6 @@
                 css = {
                     'transform': 'translate(' + css.left + 'px, ' + css.top + 'px)'
                 };
-
                 pageHolder
                     .css(css)
                     .one('webkitTransitionEnd otransitionend oTransitionEnd MSTransitionEnd transitionend', executeCallback);
@@ -120,51 +124,52 @@
         }
 
 
-        seek = function (callback) {
+        seek = function (index, callback) {
+
+            if (busy) {
+               return;
+            }
 
             switch (options.behaviourAtEdge) {
                 case 'reset':
-                    if (seekToIndex < 0) {
-                        seekToIndex = totalPages - 1;
+                    if (index < 0) {
+                        index = totalPages - 1;
                     }
-                    if (seekToIndex > totalPages - 1) {
-                        seekToIndex = 0;
+                    if (index > totalPages - 1) {
+                        index = 0;
                     }
                 break;
 
                 default:
                 case 'none':
-                    if (seekToIndex <= 0) {
-                        seekToIndex = 0;
+                    if (index <= 0) {
+                        index = 0;
                     }
-                    if (seekToIndex + 1 >= totalPages) {
-                        seekToIndex = totalPages - 1;
+                    if (index + 1 >= totalPages) {
+                        index = totalPages - 1;
                     }
                 break;
             }
 
-            if (seekToIndex === currentIndex) {
+            if (index === currentIndex) {
                 return;
             }
 
-            if (!beforeSlide()) {
-                seekToIndex = currentIndex;
+            if (!beforeSlide(index)) {
                 return;
             }
 
-            slide(callback);
+            slide(index, callback);
         }
 
         prevClick = function (e) {
             e.preventDefault();
-            seekToIndex--;
-            seek();
+            seek(currentIndex - 1);
         }
 
         nextClick = function (e) {
             e.preventDefault();
-            seekToIndex++;
-            seek();
+            seek(currentIndex + 1);
         }
 
         bindEvents = function () {
@@ -174,25 +179,26 @@
             if (options.keys) {
                 $(document).on('keydown.aslider', function (e) {
                     var key = e.which,
+                        index = currentIndex,
                         doSeek = false;
                     if (options.vertical) {
                         if (key === 38) { // up
-                            seekToIndex--;
+                            index--;
                             doSeek = true;
                         } else if (key === 40) { // down
-                            seekToIndex++;
+                            index++;
                             doSeek = true;
                         }
                     } else {
                         if (key === 37) { // left
-                            seekToIndex--;
+                            index--;
                             doSeek = true;
                         } else if (key === 39) { // right
-                            seekToIndex++;
+                            index++;
                             doSeek = true;
                         }
                     }
-                    doSeek && seek();
+                    doSeek && seek(index);
                 });
             }
         }
@@ -207,23 +213,20 @@
             next: function (callback) {
                 if (exposedMethodsDisabled)
                     return null;
-                seekToIndex++;
-                seek(callback);
+                seek(currentIndex + 1, callback);
                 return this;
             },
             prev: function (callback) {
                 if (exposedMethodsDisabled)
                     return null;
-                seekToIndex--;
-                seek(callback);
+                seek(currentIndex - 1, callback);
                 return this;
             },
             seek: function (index, callback) {
                 if (exposedMethodsDisabled)
                     return null;
                 if (index >= 0 && index < totalPages) {
-                    seekToIndex = index;
-                    seek(callback);
+                    seek(index, callback);
                     return this;
                 }
                 return false;
@@ -231,15 +234,13 @@
             begin: function (callback) {
                 if (exposedMethodsDisabled)
                     return null;
-                seekToIndex = 0;
-                seek(callback);
+                seek(0, callback);
                 return this;
             },
             end: function (callback) {
                 if (exposedMethodsDisabled)
                     return null;
-                seekToIndex = totalPages - 1;
-                seek();
+                seek(totalPages - 1, callback);
                 return this;
             },
             off: function (alsoDisableExposedMethods) {
@@ -343,8 +344,7 @@
 
         options.initialIndex = parseInt(options.initialIndex);
         if (options.initialIndex % 1 === 0 && options.initialIndex >= 0 && options.initialIndex < totalPages) { // if is int and is valid
-            seekToIndex = options.initialIndex;
-            seek();
+            seek(options.initialIndex);
         }
 
         return slider; // allow jQuery chaining
