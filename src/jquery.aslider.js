@@ -37,31 +37,18 @@
             setCallback,
             beforeSlide,
             afterSlide,
-            exposedMethods;
+            bindEvents,
+            unbindEvents,
+            exposedMethods,
+            exposedMethodsDisabled = false;
 
         setCallback = function (key, callback) {
-            if (typeof callback === null) {
-                options[key] = null;
-            } else if ($.isFunction(callback)) {
+            if ($.isFunction(callback)) {
                 options[key] = callback;
+            } else {
+                options[key] = null;
             }
         }
-
-        // validate and set callbacks
-        setCallback('beforeSlide', options.beforeSlide);
-        setCallback('afterSlide', options.afterSlide);
-
-        typeof pageHolder !== 'jQuery' && (pageHolder = slider.find(options.pageHolder));
-        typeof next !== 'jQuery' && (next = slider.find(options.next));
-        typeof prev !== 'jQuery' && (prev = slider.find(options.prev));
-
-        if (options.pageSelector) {
-            pages = pageHolder.find(options.pageSelector);
-        } else {
-            pages = pageHolder.children();
-        }
-
-        totalPages = Math.ceil(pages.length / options.itemsPerPage);
 
         beforeSlide = function () {
             var returnValue;
@@ -101,8 +88,16 @@
             return css;
         }
 
-        slide = function () {
+        slide = function (callback) {
             var css = getNewPosition();
+
+            function executeCallback() {
+                if ($.isFunction(callback)) {
+                    callback.call(exposedMethods);
+                } else {
+                    afterSlide()
+                }
+            }
 
             if (options.property === 'transform') {
                 css = $.extend({
@@ -121,18 +116,18 @@
             if (options.property === 'transform') {
                 pageHolder
                     .css(css)
-                    .one('webkitTransitionEnd otransitionend oTransitionEnd MSTransitionEnd transitionend', afterSlide);
+                    .one('webkitTransitionEnd otransitionend oTransitionEnd MSTransitionEnd transitionend', executeCallback);
 
             } else if (options.animation) {
-                !pageHolder.queue('fx').length && pageHolder.animate(css, options.slideSpeed, options.easing, afterSlide); 
+                !pageHolder.queue('fx').length && pageHolder.animate(css, options.slideSpeed, options.easing, executeCallback);
             } else {
                 pageHolder.css(css);
-                afterSlide();
+                executeCallback();
             }
         }
 
 
-        seek = function () {
+        seek = function (callback) {
 
             switch (options.behaviourAtEdge) {
                 case 'reset':
@@ -155,14 +150,16 @@
                 break;
             }
 
+            if (seekToIndex === currentIndex) {
+                return;
+            }
+
             if (!beforeSlide()) {
                 seekToIndex = currentIndex;
                 return;
             }
 
-            if (seekToIndex !== currentIndex) {
-                slide();
-            }
+            slide(callback);
         }
 
         prevClick = function (e) {
@@ -177,90 +174,182 @@
             seek();
         }
 
+        bindEvents = function () {
+            prev.length && prev.on('click.aslider', prevClick);
+            next.length && next.on('click.aslider', nextClick);
+
+            if (options.keys) {
+                $(document).on('keydown.aslider', function (e) {
+                    var key = e.which,
+                        doSeek = false;
+                    if (options.vertical) {
+                        if (key === 38) { // up
+                            seekToIndex--;
+                            doSeek = true;
+                        } else if (key === 40) { // down
+                            seekToIndex++;
+                            doSeek = true;
+                        }
+                    } else {
+                        if (key === 37) { // left
+                            seekToIndex--;
+                            doSeek = true;
+                        } else if (key === 39) { // right
+                            seekToIndex++;
+                            doSeek = true;
+                        }
+                    }
+                    doSeek && seek();
+                });
+            }
+        }
+
+        unbindEvents = function () {
+            prev.length && prev.off('click.aslider');
+            next.length && next.off('click.aslider');
+            options.keys && $(document).off('keydown.aslider');
+        }
+
         exposedMethods = {
-            next: function () {
+            next: function (callback) {
+                if (exposedMethodsDisabled)
+                    return null;
                 seekToIndex++;
-                seek();
+                seek(callback);
+                return this;
             },
-            prev: function () {
+            prev: function (callback) {
+                if (exposedMethodsDisabled)
+                    return null;
                 seekToIndex--;
-                seek();
+                seek(callback);
+                return this;
             },
-            seek: function (index) {
+            seek: function (index, callback) {
+                if (exposedMethodsDisabled)
+                    return null;
                 if (index >= 0 && index < totalPages) {
                     seekToIndex = index;
-                    seek();
+                    seek(callback);
+                    return this;
                 }
+                return false;
             },
-            begin: function () {
+            begin: function (callback) {
+                if (exposedMethodsDisabled)
+                    return null;
                 seekToIndex = 0;
-                seek();
+                seek(callback);
+                return this;
             },
-            end: function () {
+            end: function (callback) {
+                if (exposedMethodsDisabled)
+                    return null;
                 seekToIndex = totalPages - 1;
                 seek();
+                return this;
             },
-            off: function () {
-                prev.length && prev.off('click.aslider');
-                next.length && next.off('click.aslider');
-                options.keys && $(document).off('keydown.aslider');
+            off: function (alsoDisableExposedMethods) {
+                if (alsoDisableExposedMethods === undefined
+                    || alsoDisableExposedMethods === true) {
+                    exposedMethodsDisabled = true;
+                }
+                if (!slider.data('aslider'))
+                    return;
+                unbindEvents();
+                slider.data('aslider', false);
+            },
+            on: function (alsoEnableExposedMethods) {
+                if (alsoEnableExposedMethods === undefined
+                    || alsoEnableExposedMethods === true) {
+                    exposedMethodsDisabled = false;
+                }
+                if (slider.data('aslider'))
+                    return;
+                bindEvents();
+                slider.data('aslider', this);
+            },
+            isOn: function () {
+                return !!slider.data('aslider');
+            },
+            isOff: function () {
+                return !slider.data('aslider');
+            },
+            methodsEnabled: function () {
+                return !exposedMethodsDisabled;
+            },
+            methodsDisabled: function () {
+                return exposedMethodsDisabled;
             },
             getCurrentIndex: function () {
+                if (exposedMethodsDisabled)
+                    return;
                 return currentIndex;
             },
             getPages: function () {
+                if (exposedMethodsDisabled)
+                    return null;
                 return pages;
             },
             getPageCount: function () {
+                if (exposedMethodsDisabled)
+                    return null;
                 return totalPages;
             },
             getPageHolder: function () {
+                if (exposedMethodsDisabled)
+                    return null;
                 return pageHolder;
             },
             getOptions: function () {
+                if (exposedMethodsDisabled)
+                    return null;
                 return options;
             },
             beforeSlide: function (callback) {
-                if (typeof callback === 'undefined') {
+                if (exposedMethodsDisabled)
+                    return null;
+                if (callback === undefined) {
                     beforeSlide();
+                } else {
+                    setCallback('beforeSlide', callback);
                 }
-                setCallback('beforeSlide', callback);
+                return this;
             },
             afterSlide: function (callback) {
-                if (typeof callback === 'undefined') {
+                if (exposedMethodsDisabled)
+                    return null;
+                if (callback === undefined) {
                     afterSlide();
+                } else {
+                    setCallback('afterSlide', callback);
                 }
-                setCallback('afterSlide', callback);
+                return this;
             }
         };
 
-        prev.length && prev.on('click.aslider', prevClick);
-        next.length && next.on('click.aslider', nextClick);
+        // validate and set callbacks
+        setCallback('beforeSlide', options.beforeSlide);
+        setCallback('afterSlide', options.afterSlide);
 
-        if (options.keys) {
-            $(document).on('keydown.aslider', function (e) {
-                var key = e.which, 
-                    doSeek = false;
-                if (options.vertical) {
-                    if (key === 38) { // up
-                        seekToIndex--;
-                        doSeek = true;
-                    } else if (key === 40) { // down
-                        seekToIndex++;
-                        doSeek = true;
-                    }
-                } else {
-                    if (key === 37) { // left
-                        seekToIndex--;
-                        doSeek = true;
-                    } else if (key === 39) { // right
-                        seekToIndex++;
-                        doSeek = true;
-                    }   
-                }
-                doSeek && seek();
-            });
+        typeof pageHolder !== 'jQuery' && (pageHolder = slider.find(options.pageHolder));
+        typeof next !== 'jQuery' && (next = slider.find(options.next));
+        typeof prev !== 'jQuery' && (prev = slider.find(options.prev));
+
+        if (options.pageSelector) {
+            pages = pageHolder.find(options.pageSelector);
+        } else {
+            pages = pageHolder.children();
         }
+
+        totalPages = Math.ceil(pages.length / options.itemsPerPage);
+
+        // if an instance was bound before, unbind
+        if (slider.data('aslider')) {
+            unbindEvents();
+        }
+
+        bindEvents();
 
         slider.data('aslider', exposedMethods);
 
@@ -270,6 +359,6 @@
             seek();
         }
 
-        return slider;
+        return slider; // allow jQuery chaining
     }
 }(jQuery));
