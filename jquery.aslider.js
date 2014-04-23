@@ -197,6 +197,10 @@
                     var key = e.which,
                         index = currentIndex,
                         doSeek = false;
+                    // if focus is on some element other than the body
+                    if (document.activeElement !== document.body) {
+                        return;
+                    }
                     if (options.vertical) {
                         if (key === 38) { // up
                             index--;
@@ -247,13 +251,13 @@
                 }
                 return false;
             },
-            begin: function (callback) {
+            first: function (callback) {
                 if (exposedMethodsDisabled)
                     return null;
                 seek(0, callback);
                 return this;
             },
-            end: function (callback) {
+            last: function (callback) {
                 if (exposedMethodsDisabled)
                     return null;
                 seek(totalPages - 1, callback);
