@@ -105,15 +105,9 @@
                     left: 0
                 }, css);
                 css = {
-                    '-webkit-transform': 'translate(' + css.left + 'px, ' + css.top + 'px)',
-                    '-moz-transform': 'translate(' + css.left + 'px, ' + css.top + 'px)',
-                    '-ms-transform': 'translate(' + css.left + 'px, ' + css.top + 'px)',
-                    '-o-transform': 'translate(' + css.left + 'px, ' + css.top + 'px)',
                     'transform': 'translate(' + css.left + 'px, ' + css.top + 'px)'
                 };
-            }
 
-            if (options.property === 'transform') {
                 pageHolder
                     .css(css)
                     .one('webkitTransitionEnd otransitionend oTransitionEnd MSTransitionEnd transitionend', executeCallback);
@@ -343,11 +337,6 @@
         }
 
         totalPages = Math.ceil(pages.length / options.itemsPerPage);
-
-        // if an instance was bound before, unbind
-        if (slider.data('aslider')) {
-            unbindEvents();
-        }
 
         bindEvents();
 

@@ -27,14 +27,14 @@
             </p>
         </div>
         <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-        <script src="../src/jquery.aslider.js"></script>
+        <script src="../jquery.aslider.js"></script>
         <script>
             $(function () {
                 var slider = $('#slider').aslider({
                     property: 'transform',
                     disabledClass: 'disabled',
                     beforeSlide: function (seekToIndex) {
-                        console.log('index before slide:', seekToIndex);
+                        console.log('index before slide:', this.getCurrentIndex(), '; seeking to:', seekToIndex);
                     },
                     afterSlide: function (currentIndex) {
                         console.log('index after slide:', currentIndex);
