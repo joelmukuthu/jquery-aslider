@@ -27,7 +27,7 @@
                 easing: 'swing', // $.animate easing
                 vertical: false, // up/down vs left/right slider
                 property: 'position', // currently supported: 'position' and 'transform'. if set to 'transform', the plugin will not animate the slide so use css transitions instead
-                keys: true // whether or not it can be controlled by keyboard arrows
+                keys: false // whether or not it can be controlled by keyboard arrows
             }, opts),
             pageHolder = options.pageHolder,
             next = options.next,
