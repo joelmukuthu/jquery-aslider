@@ -1,8 +1,7 @@
 // slider plugin
 (function ($) {
+    'use strict';
     $.fn.aslider = function (opts) {
-        'use strict';
-
         var options = $.extend({
                 next: '.next', // also accepts a jQuery object
                 prev: '.prev', // also accepts a jQuery object
