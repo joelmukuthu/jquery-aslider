@@ -345,7 +345,7 @@ Current version: 1.0
 
 ## License
 
-[The MIT License](blob/master/LICENSE.md)
+[The MIT License](LICENSE.md)
 
 ## Contributing
 
