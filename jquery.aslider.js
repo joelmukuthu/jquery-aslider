@@ -82,20 +82,30 @@
         }
 
         getNewPosition = function (index) {
-            var offset = pages.eq(index * options.itemsPerPage).position(),
-                top = offset.top,
-                left = offset.left,
-                css = {},
+            var offset,
+                top,
+                left,
                 width,
-                height;
+                height,
+                css = {};
 
-            if (options.vertical) {
+            if (options.property === 'position') {
+                top = left = index * options.itemsPerPage * 100; // no choice but to assume items are all same size
+            } else {
+                offset = pages.eq(index * options.itemsPerPage).position();
+                top = offset.top;
+                left = offset.left;
+
                 height = pageHolder.height();
                 top = height === 0 ? 0 : (top / height * 100);
-                css.top = '-' + top + '%';
-            } else {
+
                 width = pageHolder.width();
                 left = width === 0 ? 0 : (left / width * 100);
+            }
+
+            if (options.vertical) {
+                css.top = '-' + top + '%';
+            } else {
                 css.left = '-' + left + '%';
             }
 
