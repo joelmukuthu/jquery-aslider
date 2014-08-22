@@ -25,7 +25,6 @@
                 afterSlide: null, // passed currentIndex as param
                 animation: true, // whether to use $.animate or simply set the css property
                 easing: 'swing', // $.animate easing
-                vertical: false, // up/down vs left/right slider
                 property: 'position', // currently supported: 'position' and 'transform'. if set to 'transform', the plugin will not animate the slide so use css transitions instead
                 keys: false // whether or not it can be controlled by keyboard arrows
             }, opts),
@@ -37,6 +36,10 @@
             totalPages,
             seek,
             slide,
+            totalColumns,
+            totalRows,
+            getCoordinates,
+            getIndexFromCoordinates,
             getNewPosition,
             prevClick,
             nextClick,
@@ -81,16 +84,46 @@
             }
         }
 
+        getCoordinates = function (index) {
+            var row,
+                column;
+            index += 1;
+            row     = Math.ceil(index / totalColumns);
+            column  = index % totalColumns;
+            if (column === 0) {
+                column = totalColumns;
+            }
+            return {
+                row: row,
+                column: column
+            };
+        }
+
+        getIndexFromCoordinates = function (coordinates) {
+            return ((coordinates.row - 1) * totalColumns) + (coordinates.column - 1);
+        }
+
         getNewPosition = function (index) {
-            var offset,
-                top,
+            var top,
                 left,
                 width,
                 height,
-                css = {};
+                offset,
+                coords;
 
-            if (options.property === 'position') {
-                top = left = index * options.itemsPerPage * 100; // no choice but to assume items are all same size
+            if (index === 0) {
+                return {
+                    top: 0,
+                    left: 0
+                };
+            }
+
+            if (options.property === 'position') { // no choice but to assume items are all same size
+                // find the row and column on which destination is
+                coords = getCoordinates(index);
+                // zero-base the position
+                left = (itemColumn - 1) * 100;
+                top = (itemRow - 1) * 100;
             } else {
                 offset = pages.eq(index * options.itemsPerPage).position();
                 top = offset.top;
@@ -103,13 +136,10 @@
                 left = width === 0 ? 0 : (left / width * 100);
             }
 
-            if (options.vertical) {
-                css.top = '-' + top + '%';
-            } else {
-                css.left = '-' + left + '%';
-            }
-
-            return css;
+            return {
+                top: '-' + top + '%',
+                left: '-' + left + '%'
+            };
         }
 
         slide = function (index, callback) {
@@ -206,29 +236,67 @@
                 $(document).on('keydown.aslider', function (e) {
                     var key = e.which,
                         index = currentIndex,
-                        doSeek = false;
+                        doSeek = false,
+                        nextRow,
+                        nextColumn,
+                        currentCoordinates;
                     // if focus is on some element other than the body
                     if (document.activeElement !== document.body) {
                         return;
                     }
-                    if (options.vertical) {
-                        if (key === 38) { // up
-                            index--;
-                            doSeek = true;
-                        } else if (key === 40) { // down
-                            index++;
-                            doSeek = true;
+
+                    currentCoordinates = getCoordinates(index);
+
+                    if (key === 37) { // left
+                        if (currentCoordinates.column === 1) {
+                            return;
                         }
-                    } else {
-                        if (key === 37) { // left
-                            index--;
-                            doSeek = true;
-                        } else if (key === 39) { // right
-                            index++;
-                            doSeek = true;
+                        nextColumn = currentCoordinates.column - 1;
+                        if (nextColumn < 0) {
+                            return;
                         }
+                        nextRow = currentCoordinates.row;
+                        doSeek = true;
+                    } else if (key === 39) { // right
+                        if (currentCoordinates.column === totalColumns) {
+                            return;
+                        }
+                        nextColumn = currentCoordinates.column + 1;
+                        if (nextColumn > totalColumns) {
+                            return;
+                        }
+                        nextRow = currentCoordinates.row;
+                        doSeek = true;
                     }
-                    doSeek && seek(index);
+                    if (key === 38) { // up
+                        if (currentCoordinates.row === 1) {
+                            return;
+                        }
+                        nextRow = currentCoordinates.row - 1;
+                        if (nextRow < 0) {
+                            return;
+                        }
+                        nextColumn = currentCoordinates.column;
+                        doSeek = true;
+                    } else if (key === 40) { // down
+                        if (currentCoordinates.row === totalRows) {
+                            return;
+                        }
+                        nextRow = currentCoordinates.row + 1;
+                        if (nextRow > totalRows) {
+                            return;
+                        }
+                        nextColumn = currentCoordinates.column;
+                        doSeek = true;
+                    }
+                    if (doSeek) {
+                        e.preventDefault();
+                        index = getIndexFromCoordinates({
+                            row: nextRow,
+                            column: nextColumn
+                        });
+                        seek(index);
+                    }
                 });
             }
         }
@@ -370,6 +438,9 @@
         }
 
         totalPages = Math.ceil(pages.length / options.itemsPerPage);
+
+        totalColumns = Math.floor(pageHolder.width() / pages.first().outerWidth());
+        totalRows = Math.floor(pageHolder.height() / pages.first().outerHeight());
 
         bindEvents();
 
