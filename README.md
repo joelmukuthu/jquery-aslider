@@ -182,7 +182,7 @@ JS:
 
 No need to update JS, it'll use the defaults.
 
-### CSS animations
+### CSS transitions
 
 Update the CSS and JS as follows:
 
@@ -217,7 +217,7 @@ You can detect broweser capabilities and enable CSS animations accordingly, e.g.
 ```javascript
 $('.slider').aslider({
     keys: true,
-    property: Modernizr.csstransforms ? 'transform' : 'position'
+    property: Modernizr.csstransitions ? 'transform' : 'position'
 });
 ```
 
@@ -292,7 +292,7 @@ JS:
 ```javascript
 $('.slider').aslider({
     keys: true,
-    property: Modernizr.csstransforms ? 'transform' : 'position',
+    property: Modernizr.csstransitions ? 'transform' : 'position',
     prev: 'a.up',
     next: 'a.down'
 });
@@ -323,7 +323,7 @@ var slider = $('.slider'),
     initialHeight = slider.height();
 slider.aslider({
     keys: true,
-    property: Modernizr.csstransforms ? 'transform' : 'position',
+    property: Modernizr.csstransitions ? 'transform' : 'position',
     prev: 'a.up',
     next: 'a.down',
     beforeSlide: function (index) {
