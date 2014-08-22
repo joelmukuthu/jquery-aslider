@@ -1,11 +1,11 @@
-# aslider
+# aslider - v1.1
 
-> yet another slider plugin for jQuery, but the fact that it supports CSS animations and vertical sliders makes it a  little special.
+> yet another slider plugin for jQuery, but the fact that it supports CSS animations and grid transitions makes it a  little special.
 
 ## Features
 
 * Supports CSS animations as well animating using jQuery i.e. by left or top properties
-* Supports vertical (up/down) sliding
+* Supports grid transitions - vertical/horizontal/diagonal. automatically detects what row and column an item is in when transitioning to it
 * Plays nice with responsive designs - doesn't add any CSS to make the elements responsive but doesn't interfere with it either
 * The slider items must not be of the same size. This comes in handy especially for vertical sliders
 * provides an API for you to programmatically initiate sliding, among other functions
@@ -35,9 +35,8 @@ Download and include the plugin code anywhere in your HTML but *after* jQuery, p
 * `animation: true` - whether or not to animate the sliding i.e. use `$().animate` or simply set the CSS property. Note that if `property` is set to `transform` then this is treated as `false`.
 * `slideSpeed: 400` - speed for `$().animate`
 * `easing: 'swing'` - easing for `$().animate`
-* `vertical: false` - up/down or left/right slider?
 * `property: 'position'` - allowed: `position` and `transform`. If set to `transform`, the plugin will not animate the sliding at all so combine this with CSS transitions instead
-* `keys: false` - whether or not sliders can be controlled by keyboard left and right arrows. If `vertical` is `true`, then up and down arrows are used. Note that the keys will control *all* the sliders on a page, unless some element e.g. a form input has focus. If you have several slider instances and only want to enable keys on one of them then initiate them separately and set `keys` to be `true` only for the one slider.
+* `keys: false` - whether or not sliders can be controlled by keyboard left/right/up/down arrows. Note that the keys will control *all* the sliders on a page, unless some element e.g. a form input has focus. If you have several slider instances and only want to enable keys on one of them then initiate them separately and set `keys` to be `true` only for the one slider.
 
 ## Methods
 
@@ -224,6 +223,8 @@ $('.slider').aslider({
 
 ### Vertical
 
+No extra configuration is needed for the plugin to support vertical sliders.
+
 HTML:
 
 ```html
@@ -292,7 +293,6 @@ JS:
 $('.slider').aslider({
     keys: true,
     property: Modernizr.csstransforms ? 'transform' : 'position',
-    vertical: true,
     prev: 'a.up',
     next: 'a.down'
 });
@@ -324,7 +324,6 @@ var slider = $('.slider'),
 slider.aslider({
     keys: true,
     property: Modernizr.csstransforms ? 'transform' : 'position',
-    vertical: true,
     prev: 'a.up',
     next: 'a.down',
     beforeSlide: function (index) {
@@ -339,9 +338,9 @@ slider.aslider({
 });
 ```
 
-## Version - 1.0
+## Version - 1.1
 
-Current version: 1.0
+Current version: 1.1
 
 ## License
 
