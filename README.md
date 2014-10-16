@@ -114,7 +114,7 @@ CSS:
 .slider li:nth-child(even) { background: #cdcdcd; } /* 3 */
 ```
 
-1 - required if not using CSS animations,
+1 - required,
 2 - make it responsive,
 3 - aesthetics
     
@@ -284,7 +284,7 @@ CSS:
     cursor: default; /* 3 */
 }
 ```
-1 - required if not using CSS animations,
+1 - required,
 3 - aesthetics
 
 JS:
