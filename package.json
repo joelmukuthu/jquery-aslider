@@ -2,7 +2,7 @@
   "name": "jquery-aslider",
   "version": "1.1.1",
   "description": "slider plugin for jQuery",
-  "main": "jquery.aslider.js",
+  "main": "jquery-aslider.js",
   "directories": {
     "test": "test"
   },
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/joelmukuthu/aslider.git"
+    "url": "https://github.com/joelmukuthu/jquery-aslider.git"
   },
   "keywords": [
     "jquery",
@@ -21,7 +21,16 @@
   "author": "Joel Mukuthu <joelmukuthu@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/joelmukuthu/aslider/issues"
+    "url": "https://github.com/joelmukuthu/jquery-aslider/issues"
   },
-  "homepage": "https://github.com/joelmukuthu/aslider"
+  "homepage": "https://github.com/joelmukuthu/jquery-aslider",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-banner": "^0.6.0",
+    "grunt-contrib-jshint": "^0.11.3",
+    "grunt-contrib-uglify": "^0.11.0",
+    "jshint-stylish": "^2.1.0",
+    "load-grunt-tasks": "^3.3.0",
+    "release-it": "^2.3.1"
+  }
 }
