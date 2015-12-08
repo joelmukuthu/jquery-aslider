@@ -1,6 +1,6 @@
 {
   "name": "jquery-aslider",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "slider plugin for jQuery",
   "main": "jquery-aslider.js",
   "directories": {
