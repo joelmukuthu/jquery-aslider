@@ -1,0 +1,27 @@
+{
+  "name": "jquery-aslider",
+  "version": "1.1.1",
+  "description": "slider plugin for jQuery",
+  "main": "jquery.aslider.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joelmukuthu/aslider.git"
+  },
+  "keywords": [
+    "jquery",
+    "slider",
+    "aslider"
+  ],
+  "author": "Joel Mukuthu <joelmukuthu@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/joelmukuthu/aslider/issues"
+  },
+  "homepage": "https://github.com/joelmukuthu/aslider"
+}
