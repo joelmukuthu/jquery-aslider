@@ -56,7 +56,10 @@ module.exports = function (grunt) {
             commitMessage: 'Release %s',
             tagName: 'v%s',
             tagAnnotation: 'Release %s',
-            buildCommand: 'grunt build'
+            buildCommand: 'grunt build',
+            dist: {
+              baseDir: null
+            }
         }
     }
   });
