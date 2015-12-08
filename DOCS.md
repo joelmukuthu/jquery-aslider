@@ -1,4 +1,4 @@
-# aslider docs
+# jquery-aslider docs
 
 ## Options
 

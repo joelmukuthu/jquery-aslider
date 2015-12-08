@@ -1,4 +1,4 @@
-# aslider [![Bower version](https://badge.fury.io/bo/jquery-aslider.svg)](http://badge.fury.io/bo/jquery-aslider)
+# jquery-aslider [![Bower version](https://badge.fury.io/bo/jquery-aslider.svg)](http://badge.fury.io/bo/jquery-aslider)
 
 slider plugin for jQuery, supports CSS animations and grid transitions. [Demo](http://joelmukuthu.github.io/jquery-aslider/)
 
