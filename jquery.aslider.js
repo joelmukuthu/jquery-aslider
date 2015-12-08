@@ -115,8 +115,8 @@
                 // find the row and column on which destination is
                 coords = getCoordinates(index);
                 // zero-base the position
-                left = (itemColumn - 1) * 100;
-                top = (itemRow - 1) * 100;
+                left = (coords.column - 1) * 100;
+                top = (coords.row - 1) * 100;
             } else {
                 offset = pages.eq(index * options.itemsPerPage).position();
                 top = offset.top;
