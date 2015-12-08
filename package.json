@@ -24,6 +24,12 @@
     "url": "https://github.com/joelmukuthu/jquery-aslider/issues"
   },
   "homepage": "https://github.com/joelmukuthu/jquery-aslider",
+  "peerDependencies": {
+    "jquery": ">=1.11"
+  },
+  "dependencies": {
+    "jquery": ">=1.11"
+  },
   "devDependencies": {
     "grunt": "^0.4.5",
     "grunt-banner": "^0.6.0",
