@@ -460,8 +460,8 @@
 
         totalPages = Math.ceil(pages.length / options.itemsPerPage);
 
-        totalColumns = Math.floor(pageHolder.width() / pages.first().outerWidth());
-        totalRows = Math.floor(pageHolder.height() / pages.first().outerHeight());
+        totalColumns = Math.round(pageHolder.width() / pages.first().outerWidth());
+        totalRows = Math.round(pageHolder.height() / pages.first().outerHeight());
 
         bindEvents();
 
