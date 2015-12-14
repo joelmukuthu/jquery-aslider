@@ -76,7 +76,7 @@ $('.slider').aslider();
 ```
 
 ## Documentation
-Have a look at the [docs](DOCS.md) for all the configuration options, API methods and examples. For more examples, also have a look at the [test folder](test) or view the source on the [demo site](http://joelmukuthu.github.io/jquery-aslider/).
+Have a look at the [docs](DOCS.md) for all the configuration options, API methods and examples. For more examples, also have a look at the [example](example) or view the source on the [demo site](http://joelmukuthu.github.io/jquery-aslider/).
 
 ## License
 

@@ -1,482 +1,485 @@
 (function ($) {
+  'use strict';
 
-    'use strict';
+  function Slider(id, element, options) {
+    this.id = id;
+    this.element = element;
 
-    var aslider = function (elem, opts) {
-        var options = $.extend({
-                next: '.next', // also accepts a jQuery object
-                prev: '.prev', // also accepts a jQuery object
-                pageHolder: '> ul', // element whose children (or specified by selector) are the actual pages, also accepts a jQuery object
-                pageSelector: null, // if null, children of pageHolder are assumed to be the pages. if not, the selector is applied on pageHolder
-                itemsPerPage: 1,
-                slideSpeed: 400,
-                initialIndex: 0,
-                behaviourAtEdge: 'none', // 'reset', 'none'
-                disabledClass: 'disabled', // may also be null or empty string,
-                beforeSlide: null, // passed the index being seeked to as param
-                afterSlide: null, // passed currentIndex as param
-                animation: true, // whether to use $.animate or simply set the css property
-                easing: 'swing', // $.animate easing
-                property: 'position', // currently supported: 'position' and 'transform'. if set to 'transform', the plugin will not animate the slide so use css transitions instead
-                keys: false // whether or not it can be controlled by keyboard arrows
-            }, opts),
-            pageHolder = options.pageHolder,
-            next = options.next,
-            prev = options.prev,
-            currentIndex = 0,
-            pages,
-            totalPages,
-            seek,
-            slide,
-            totalColumns,
-            totalRows,
-            getCoordinates,
-            getIndexFromCoordinates,
-            getNewPosition,
-            prevClick,
-            nextClick,
-            setCallback,
-            beforeSlide,
-            afterSlide,
-            bindEvents,
-            unbindEvents,
-            exposedMethods,
-            busy = false,
-            exposedMethodsDisabled = false;
+    if (options.pageContainer instanceof $) {
+      this.pageContainer = options.pageContainer;
+    } else {
+      this.pageContainer = this.element.find(options.pageContainer);
+    }
+    this.pageSelector = options.pageSelector;
 
-        setCallback = function (key, callback) {
-            if ($.isFunction(callback)) {
-                options[key] = callback;
-            } else {
-                options[key] = null;
-            }
-        };
+    this.upButton = options.up;
+    this.rightButton = options.right;
+    this.downButton = options.down;
+    this.leftButton = options.left;
 
-        beforeSlide = function (index) {
-            var returnValue;
-            if (options.beforeSlide) {
-                returnValue = options.beforeSlide.call(exposedMethods, index);
-                return returnValue === false ? false : true;
-            }
-            return true;
-        };
+    this.prevButton = options.prev;
+    this.nextButton = options.next;
+    this.firstButton = options.first;
+    this.lastButton = options.last;
 
-        afterSlide = function () {
-            if (options.disabledClass && options.behaviourAtEdge === 'none') {
-                prev.add(next).removeClass(options.disabledClass);
-                if (currentIndex === 0) {
-                    prev.addClass(options.disabledClass);
-                }
-                if (currentIndex === totalPages - 1) {
-                    next.addClass(options.disabledClass);
-                }
-            }
-            if (options.afterSlide) {
-                options.afterSlide.call(exposedMethods, currentIndex);
-            }
-        };
+    this.disabledButtonsClass = options.disabledButtonsClass;
 
-        getCoordinates = function (index) {
-            var row,
-                column;
-            index += 1;
-            row     = Math.ceil(index / totalColumns);
-            column  = index % totalColumns;
-            if (column === 0) {
-                column = totalColumns;
-            }
-            return {
-                row: row,
-                column: column
-            };
-        };
+    this.keyboardArrowKeys = options.keyboardArrowKeys;
 
-        getIndexFromCoordinates = function (coordinates) {
-            return ((coordinates.row - 1) * totalColumns) + (coordinates.column - 1);
-        };
+    this.index = 0;
+    this.itemsPerPage = options.itemsPerPage;
 
-        getNewPosition = function (index) {
-            var top,
-                left,
-                width,
-                height,
-                offset,
-                coords;
+    this.cssTransitions = options.cssTransitions;
+    this.jQueryAnimation = options.jQueryAnimation;
+    this.jQueryAnimationSpeed = options.jQueryAnimationSpeed;
+    this.jQueryAnimationEasing = options.jQueryAnimationEasing;
 
-            if (index === 0) {
-                return {
-                    top: 0,
-                    left: 0
-                };
-            }
+    this.rewind = options.rewind;
 
-            if (options.property === 'position') { // no choice but to assume items are all same size
-                // find the row and column on which destination is
-                coords = getCoordinates(index);
-                // zero-base the position
-                left = (coords.column - 1) * 100;
-                top = (coords.row - 1) * 100;
-            } else {
-                offset = pages.eq(index * options.itemsPerPage).position();
-                top = offset.top;
-                left = offset.left;
+    this.beforeSlide = options.beforeSlide;
+    this.afterSlide = options.afterSlide;
 
-                height = pageHolder.height();
-                top = height === 0 ? 0 : (top / height * 100);
+    this.enable();
 
-                width = pageHolder.width();
-                left = width === 0 ? 0 : (left / width * 100);
-            }
+    if (this._isValid(options.initialIndex)) {
+      this.seek(options.initialIndex);
+    }
+  }
 
-            return {
-                top: '-' + top + '%',
-                left: '-' + left + '%'
-            };
-        };
+  Slider.prototype._registerEvents = function () {
+    var slider = this;
 
-        slide = function (index, callback) {
-            var css = getNewPosition(index);
+    if (this.upButton) {
+      this.element.on('click.aslider', this.upButton, function (e) {
+        e.preventDefault();
+        slider.up();
+      });
+    }
 
-            function executeCallback() {
+    if (this.rightButton) {
+      this.element.on('click.aslider', this.rightButton, function (e) {
+        e.preventDefault();
+        slider.right();
+      });
+    }
 
-                busy = false;
-                currentIndex = index;
+    if (this.downButton) {
+      this.element.on('click.aslider', this.downButton, function (e) {
+        e.preventDefault();
+        slider.down();
+      });
+    }
 
-                if ($.isFunction(callback)) {
-                    callback.call(exposedMethods, currentIndex);
-                } else {
-                    afterSlide();
-                }
-            }
+    if (this.leftButton) {
+      this.element.on('click.aslider', this.leftButton, function (e) {
+        e.preventDefault();
+        slider.left();
+      });
+    }
 
-            busy = true;
+    if (this.prevButton) {
+      this.element.on('click.aslider', this.prevButton, function (e) {
+        e.preventDefault();
+        slider.prev();
+      });
+    }
 
-            if (options.property === 'transform') {
-                css = $.extend({
-                    top: 0,
-                    left: 0
-                }, css);
-                css = {
-                    'transform': 'translate(' + css.left + ', ' + css.top + ')'
-                };
-                pageHolder
-                    .css(css)
-                    .one('webkitTransitionEnd otransitionend oTransitionEnd MSTransitionEnd transitionend', executeCallback);
+    if (this.nextButton) {
+      this.element.on('click.aslider', this.nextButton, function (e) {
+        e.preventDefault();
+        slider.next();
+      });
+    }
 
-            } else if (options.animation) {
-                if (!pageHolder.queue('fx').length) {
-                    pageHolder.animate(css, options.slideSpeed, options.easing, executeCallback);
-                }
-            } else {
-                pageHolder.css(css);
-                executeCallback();
-            }
-        };
+    if (this.firstButton) {
+      this.element.on('click.aslider', this.firstButton, function (e) {
+        e.preventDefault();
+        slider.first();
+      });
+    }
 
-        seek = function (index, callback) {
+    if (this.lastButton) {
+      this.element.on('click.aslider', this.lastButton, function (e) {
+        e.preventDefault();
+        slider.last();
+      });
+    }
 
-            if (busy) {
-               return;
-            }
+    if (this.keyboardArrowKeys) {
+      $(document).on('keydown.aslider' + this.id, function (e) {
+        // if focus is on some element other than the body
+        if (document.activeElement !== document.body) {
+          return;
+        }
 
-            switch (options.behaviourAtEdge) {
-                case 'reset':
-                    if (index < 0) {
-                        index = totalPages - 1;
-                    }
-                    if (index > totalPages - 1) {
-                        index = 0;
-                    }
-                break;
-
-                default:
-                case 'none':
-                    if (index <= 0) {
-                        index = 0;
-                    }
-                    if (index + 1 >= totalPages) {
-                        index = totalPages - 1;
-                    }
-                break;
-            }
-
-            if (index === currentIndex) {
-                return;
-            }
-
-            if (!beforeSlide(index)) {
-                return;
-            }
-
-            slide(index, callback);
-        };
-
-        prevClick = function (e) {
+        var key = e.which;
+        switch (key) {
+          case 38:
             e.preventDefault();
-            seek(currentIndex - 1);
-        };
+            slider.up();
+            break;
 
-        nextClick = function (e) {
+          case 39:
             e.preventDefault();
-            seek(currentIndex + 1);
-        };
+            slider.right();
+            break;
 
-        bindEvents = function () {
-            if (prev.length) {
-                prev.on('click.aslider', prevClick);
-            }
-            if (next.length) {
-                next.on('click.aslider', nextClick);
-            }
+          case 40:
+            e.preventDefault();
+            slider.down();
+            break;
 
-            if (options.keys) {
-                $(document).on('keydown.aslider', function (e) {
-                    var key = e.which,
-                        index = currentIndex,
-                        doSeek = false,
-                        nextRow,
-                        nextColumn,
-                        currentCoordinates;
-                    // if focus is on some element other than the body
-                    if (document.activeElement !== document.body) {
-                        return;
-                    }
-
-                    currentCoordinates = getCoordinates(index);
-
-                    if (key === 37) { // left
-                        if (currentCoordinates.column === 1) {
-                            return;
-                        }
-                        nextColumn = currentCoordinates.column - 1;
-                        if (nextColumn < 0) {
-                            return;
-                        }
-                        nextRow = currentCoordinates.row;
-                        doSeek = true;
-                    } else if (key === 39) { // right
-                        if (currentCoordinates.column === totalColumns) {
-                            return;
-                        }
-                        nextColumn = currentCoordinates.column + 1;
-                        if (nextColumn > totalColumns) {
-                            return;
-                        }
-                        nextRow = currentCoordinates.row;
-                        doSeek = true;
-                    }
-                    if (key === 38) { // up
-                        if (currentCoordinates.row === 1) {
-                            return;
-                        }
-                        nextRow = currentCoordinates.row - 1;
-                        if (nextRow < 0) {
-                            return;
-                        }
-                        nextColumn = currentCoordinates.column;
-                        doSeek = true;
-                    } else if (key === 40) { // down
-                        if (currentCoordinates.row === totalRows) {
-                            return;
-                        }
-                        nextRow = currentCoordinates.row + 1;
-                        if (nextRow > totalRows) {
-                            return;
-                        }
-                        nextColumn = currentCoordinates.column;
-                        doSeek = true;
-                    }
-                    if (doSeek) {
-                        e.preventDefault();
-                        index = getIndexFromCoordinates({
-                            row: nextRow,
-                            column: nextColumn
-                        });
-                        seek(index);
-                    }
-                });
-            }
-        };
-
-        unbindEvents = function () {
-            if (prev.length) {
-                prev.off('click.aslider');
-            }
-            if (next.length) {
-                next.off('click.aslider');
-            }
-            if (options.keys) {
-                $(document).off('keydown.aslider');
-            }
-        };
-
-        exposedMethods = {
-            next: function (callback) {
-                if (exposedMethodsDisabled) {
-                    return null;
-                }
-                seek(currentIndex + 1, callback);
-                return this;
-            },
-            prev: function (callback) {
-                if (exposedMethodsDisabled) {
-                    return null;
-                }
-                seek(currentIndex - 1, callback);
-                return this;
-            },
-            seek: function (index, callback) {
-                if (exposedMethodsDisabled) {
-                    return null;
-                }
-                if (index >= 0 && index < totalPages) {
-                    seek(index, callback);
-                    return this;
-                }
-                return false;
-            },
-            first: function (callback) {
-                if (exposedMethodsDisabled) {
-                    return null;
-                }
-                seek(0, callback);
-                return this;
-            },
-            last: function (callback) {
-                if (exposedMethodsDisabled) {
-                    return null;
-                }
-                seek(totalPages - 1, callback);
-                return this;
-            },
-            off: function (alsoDisableExposedMethods) {
-                if (alsoDisableExposedMethods === undefined || alsoDisableExposedMethods === true) {
-                    exposedMethodsDisabled = true;
-                }
-                if (!elem.data('aslider')) {
-                    return;
-                }
-                unbindEvents();
-                elem.data('aslider', false);
-            },
-            on: function (alsoEnableExposedMethods) {
-                if (alsoEnableExposedMethods === undefined || alsoEnableExposedMethods === true) {
-                    exposedMethodsDisabled = false;
-                }
-                if (elem.data('aslider')) {
-                    return;
-                }
-                bindEvents();
-                elem.data('aslider', this);
-            },
-            isOn: function () {
-                return !!elem.data('aslider');
-            },
-            isOff: function () {
-                return !elem.data('aslider');
-            },
-            methodsEnabled: function () {
-                return !exposedMethodsDisabled;
-            },
-            methodsDisabled: function () {
-                return exposedMethodsDisabled;
-            },
-            getCurrentIndex: function () {
-                if (exposedMethodsDisabled) {
-                    return;
-                }
-                return currentIndex;
-            },
-            getPages: function () {
-                if (exposedMethodsDisabled) {
-                    return null;
-                }
-                return pages;
-            },
-            getPageCount: function () {
-                if (exposedMethodsDisabled) {
-                    return null;
-                }
-                return totalPages;
-            },
-            getPageHolder: function () {
-                if (exposedMethodsDisabled) {
-                    return null;
-                }
-                return pageHolder;
-            },
-            getOptions: function () {
-                if (exposedMethodsDisabled) {
-                    return null;
-                }
-                return options;
-            },
-            getVersion: function () {
-                return '1.1';
-            },
-            beforeSlide: function (callback) {
-                if (exposedMethodsDisabled) {
-                    return null;
-                }
-                if (callback === undefined) {
-                    beforeSlide();
-                } else {
-                    setCallback('beforeSlide', callback);
-                }
-                return this;
-            },
-            afterSlide: function (callback) {
-                if (exposedMethodsDisabled) {
-                    return null;
-                }
-                if (callback === undefined) {
-                    afterSlide();
-                } else {
-                    setCallback('afterSlide', callback);
-                }
-                return this;
-            }
-        };
-
-        // validate and set callbacks
-        setCallback('beforeSlide', options.beforeSlide);
-        setCallback('afterSlide', options.afterSlide);
-
-        if (!(pageHolder instanceof $)) {
-            pageHolder = elem.find(options.pageHolder);
+          case 37:
+            e.preventDefault();
+            slider.left();
+            break;
         }
-        if (!(next instanceof $)) {
-            next = elem.find(options.next);
-        }
-        if (!(prev instanceof $)) {
-            prev = elem.find(options.prev);
-        }
+      });
+    }
+  };
 
-        if (options.pageSelector) {
-            pages = pageHolder.find(options.pageSelector);
-        } else {
-            pages = pageHolder.children();
-        }
+  Slider.prototype._deregisterEvents = function () {
+    this.element.off('click.aslider');
+    $(document).off('keydown.aslider' + this.id);
+  };
 
-        totalPages = Math.ceil(pages.length / options.itemsPerPage);
+  Slider.prototype.enable = function() {
+    if (this.enabled) {
+      return;
+    }
+    this._registerEvents();
+    this.element.data('aslider', this);
+    this.enabled = true;
+  };
 
-        totalColumns = Math.round(pageHolder.width() / pages.first().outerWidth());
-        totalRows = Math.round(pageHolder.height() / pages.first().outerHeight());
+  Slider.prototype.disable = function() {
+    if (!this.enabled) {
+      return;
+    }
+    this._deregisterEvents();
+    this.element.data('aslider', null);
+    this.enabled = false;
+  };
 
-        bindEvents();
+  Slider.prototype._getPages = function() {
+    return this.pageSelector ? this.pageContainer.find(this.pageSelector) : this.pageContainer.children();
+  };
 
-        elem.data('aslider', exposedMethods);
+  Slider.prototype._getPageCount = function() {
+    return Math.ceil(this._getPages().length / this.itemsPerPage);
+  };
 
-        options.initialIndex = parseInt(options.initialIndex);
-        if (options.initialIndex % 1 === 0 && options.initialIndex >= 0 && options.initialIndex < totalPages) { // if is int and is valid
-            seek(options.initialIndex);
-        }
+  Slider.prototype._getColumnCount = function() {
+    return Math.round(this.pageContainer.width() / this._getPages().eq(this.index).outerWidth());
+  };
+
+  Slider.prototype._getRowCount = function() {
+    return Math.round(this.pageContainer.height() / this._getPages().eq(this.index).outerHeight());
+  };
+
+  Slider.prototype._isValid = function(index) {
+    return index > 0 && index < this._getPageCount();
+  };
+
+  Slider.prototype._getIndex = function (coordinates) {
+    return coordinates.row * this._getColumnCount() + coordinates.column;
+  };
+
+  Slider.prototype._getCoordinates = function (index) {
+    index += 1;
+
+    var columnCount = this._getColumnCount();
+    var row = Math.ceil(index / columnCount);
+    var column = index % columnCount;
+
+    if (column === 0) {
+      column = columnCount;
+    }
+
+    return {
+      row: row - 1,
+      column: column - 1
+    };
+  };
+
+  Slider.prototype._getCss = function (index) {
+    var css = {
+      top: 0,
+      left: 0
     };
 
-    $.fn.aslider = function(opts) {
-        return this.each(function () {
-            aslider($(this), opts);
-        });
+    if (index === 0) {
+      return css;
+    }
+
+    if (this.cssTransitions) {
+      var offset = this._getPages().eq(index * this.itemsPerPage).position();
+      css.top = offset.top;
+      css.left = offset.left;
+
+      var height = this.pageContainer.height();
+      css.top = height === 0 ? 0 : (css.top / height * 100);
+
+      var width = this.pageContainer.width();
+      css.left = width === 0 ? 0 : (css.left / width * 100);
+    } else { // no choice but to assume items are the same size
+      var coordinates = this._getCoordinates(index);
+      css.left = coordinates.column * 100;
+      css.top = coordinates.row * 100;
+    }
+
+    return {
+      top: '-' + css.top + '%',
+      left: '-' + css.left + '%'
+    };
+  };
+
+  Slider.prototype._updateButtonStates = function () {
+    var coordinates = this._getCoordinates(this.index);
+    var disabledButtons = [];
+
+    if (this.index <= 0) {
+      disabledButtons.push(this.firstButton, this.prevButton);
+    }
+    if (this.index >= this._getPageCount() - 1) {
+      disabledButtons.push(this.lastButton, this.nextButton);
+    }
+    if (coordinates.row <= 0) {
+      disabledButtons.push(this.upButton);
+    }
+    if (coordinates.row >= this._getRowCount() - 1) {
+      disabledButtons.push(this.downButton);
+    }
+    if (coordinates.column <= 0) {
+      disabledButtons.push(this.leftButton);
+    }
+    if (coordinates.column >= this._getColumnCount() - 1) {
+      disabledButtons.push(this.rightButton);
+    }
+
+    if (disabledButtons.length) {
+      var allButtons = [
+        this.upButton,
+        this.rightButton,
+        this.downButton,
+        this.leftButton,
+        this.prevButton,
+        this.nextButton,
+        this.firstButton,
+        this.lastButton
+      ];
+
+      this.element.find(allButtons.join(',')).removeClass(this.disabledButtonsClass);
+      this.element.find(disabledButtons.join(',')).addClass(this.disabledButtonsClass);
+    }
+  };
+
+  Slider.prototype._slide = function(index, callback) {
+    var css = this._getCss(index);
+    var slider = this;
+
+    function done() {
+      slider.index = index;
+
+      if (!slider.rewind && slider.disabledButtonsClass) {
+        slider._updateButtonStates();
+      }
+
+      var cb = $.isFunction(callback) ? callback : slider.afterSlide;
+      cb(slider.index);
+    }
+
+    if (this.cssTransitions) {
+      this.pageContainer.css({
+        transform: 'translate(' + css.left + ', ' + css.top + ')'
+      }).one('webkitTransitionEnd otransitionend oTransitionEnd MSTransitionEnd transitionend', done);
+    } else if (this.jQueryAnimation) {
+      this.pageContainer.stop();
+      this.pageContainer.animate(css, this.jQueryAnimationSpeed, this.jQueryAnimationEasing, done);
+    } else {
+      this.pageContainer.css(css);
+      done();
+    }
+  };
+
+  Slider.prototype.seek = function(index, callback) {
+    if (!this.enabled) {
+      return;
+    }
+
+    var firstIndex = 0;
+    var lastIndex = this._getPageCount() - 1;
+
+    if (index < 0) {
+      if (this.rewind) {
+        index = lastIndex;
+      } else {
+        index = firstIndex;
+      }
+    } else if (index > lastIndex) {
+      if (this.rewind) {
+        index = firstIndex;
+      } else {
+        index = lastIndex;
+      }
+    }
+
+    if (index === this.index) {
+      return;
+    }
+
+    if (this.beforeSlide(index) === false) {
+      return;
+    }
+
+    this._slide(index, callback);
+  };
+
+  Slider.prototype.up = function(callback) {
+    var coordinates = this._getCoordinates(this.index);
+
+    if (coordinates.row < 0) {
+      if (this.rewind) {
+        coordinates.row = this._getRowCount() - 1;
+      } else {
+        return;
+      }
+    } else {
+      coordinates.row -= 1;
+    }
+
+    this.seek(this._getIndex(coordinates), callback);
+  };
+
+  Slider.prototype.right = function(callback) {
+    var coordinates = this._getCoordinates(this.index);
+    var columnCount = this._getColumnCount();
+
+    if (coordinates.column > columnCount - 1) {
+      if (this.rewind) {
+        coordinates.column = 0;
+      } else {
+        return;
+      }
+    } else {
+      coordinates.column += 1;
+    }
+
+    this.seek(this._getIndex(coordinates), callback);
+  };
+
+  Slider.prototype.down = function(callback) {
+    var coordinates = this._getCoordinates(this.index);
+    var rowCount = this._getRowCount();
+
+    if (coordinates.row > rowCount - 1) {
+      if (this.rewind) {
+        coordinates.row = 0;
+      } else {
+        return;
+      }
+    } else {
+      coordinates.row += 1;
+    }
+
+    this.seek(this._getIndex(coordinates), callback);
+  };
+
+  Slider.prototype.left = function(callback) {
+    var coordinates = this._getCoordinates(this.index);
+
+    if (coordinates.column < 0) {
+      if (this.rewind) {
+        coordinates.column = this._getColumnCount() - 1;
+      } else {
+        return;
+      }
+    } else {
+      coordinates.column -= 1;
+    }
+
+    this.seek(this._getIndex(coordinates), callback);
+  };
+
+  Slider.prototype.prev = function(callback) {
+    this.seek(this.index - 1, callback);
+  };
+
+  Slider.prototype.next = function(callback) {
+    this.seek(this.index + 1, callback);
+  };
+
+  Slider.prototype.first = function(callback) {
+    this.seek(0, callback);
+  };
+
+  Slider.prototype.last = function(callback) {
+    this.seek(this._getPageCount() - 1, callback);
+  };
+
+  Slider.prototype.getIndex = function () {
+    return this.index;
+  }
+
+  $.fn.aslider = function(userOptions) {
+    var options = {
+      up: '.up',
+      right: '.right',
+      down: '.down',
+      left: '.left',
+
+      prev: '.prev',
+      next: '.next',
+      first: '.first',
+      last: '.last',
+
+      disabledButtonsClass: 'disabled', // may also be null or empty string,
+
+      rewind: false, // whether to restart the slider when it reaches the end or add the `disabledButtonsClass`
+
+      keyboardArrowKeys: false, // whether or not it can be controlled by keyboard arrows
+
+      pageContainer: '> ul', // element whose children (or specified by `pageSelector`) are the actual pages, also accepts a jQuery object
+      pageSelector: null, // if null, children of `pageContainer` are assumed to be the pages. else the selector is applied on `pageContainer`
+
+      itemsPerPage: 1,
+      initialIndex: 0,
+
+      cssTransitions: false, // if this is true, it takes precedence over `jQueryAnimation`
+
+      jQueryAnimation: true,
+      jQueryAnimationSpeed: 400,
+      jQueryAnimationEasing: 'swing',
+
+      beforeSlide: $.noop, // passed the index being seeked to as param
+      afterSlide: $.noop // passed currentIndex as param
     };
 
+    $.extend(options, userOptions);
+
+    if (typeof options.beforeSlide !== 'function') {
+      throw new Error('beforeSlide should be a function');
+    }
+
+    if (typeof options.afterSlide !== 'function') {
+      throw new Error('beforeSlide should be a function');
+    }
+
+    options.initialIndex = parseInt(options.initialIndex, 10);
+    if (isNaN(options.initialIndex)) {
+      throw new Error('initialIndex should be an integer');
+    }
+
+    options.itemsPerPage = parseInt(options.itemsPerPage, 10);
+    if (isNaN(options.itemsPerPage)) {
+      throw new Error('itemsPerPage should be an integer');
+    }
+
+    // TODO: Validate other options e.g. jQueryAnimationSpeed?
+
+    var sliders = this;
+    return sliders.each(function (i) {
+      new Slider(i, $(this), options);
+    });
+  };
 }(jQuery));
