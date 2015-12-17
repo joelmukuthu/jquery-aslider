@@ -420,7 +420,7 @@
 
   Slider.prototype.getIndex = function () {
     return this.index;
-  }
+  };
 
   $.fn.aslider = function(userOptions) {
     var options = {
