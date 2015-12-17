@@ -17,7 +17,7 @@
     this.downButton = options.down;
     this.leftButton = options.left;
 
-    this.prevButton = options.prev;
+    this.previousButton = options.previous;
     this.nextButton = options.next;
     this.firstButton = options.first;
     this.lastButton = options.last;
@@ -77,10 +77,10 @@
       });
     }
 
-    if (this.prevButton) {
-      this.element.on('click.aslider', this.prevButton, function (e) {
+    if (this.previousButton) {
+      this.element.on('click.aslider', this.previousButton, function (e) {
         e.preventDefault();
-        slider.prev();
+        slider.previous();
       });
     }
 
@@ -239,7 +239,7 @@
     var disabledButtons = [];
 
     if (this.index <= 0) {
-      disabledButtons.push(this.firstButton, this.prevButton);
+      disabledButtons.push(this.firstButton, this.previousButton);
     }
     if (this.index >= this._getPageCount() - 1) {
       disabledButtons.push(this.lastButton, this.nextButton);
@@ -263,7 +263,7 @@
         this.rightButton,
         this.downButton,
         this.leftButton,
-        this.prevButton,
+        this.previousButton,
         this.nextButton,
         this.firstButton,
         this.lastButton
@@ -401,7 +401,7 @@
     this.seek(this._getIndex(coordinates), callback);
   };
 
-  Slider.prototype.prev = function(callback) {
+  Slider.prototype.previous = function(callback) {
     this.seek(this.index - 1, callback);
   };
 
@@ -428,7 +428,7 @@
       down: '.down',
       left: '.left',
 
-      prev: '.prev',
+      previous: '.previous',
       next: '.next',
       first: '.first',
       last: '.last',
