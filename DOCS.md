@@ -1,13 +1,32 @@
 # jquery-aslider docs
 
+Table of Contents
+=================
+
+  * [jquery-aslider docs](#jquery-aslider-docs)
+    * [Options](#options)
+    * [API Methods](#api-methods)
+        * [Disable/enable:](#disableenable)
+        * [Control transitioning:](#control-transitioning)
+        * [Getters](#getters)
+        * [Low level](#low-level)
+    * [Examples](#examples)
+      * [Minimal setup](#minimal-setup)
+      * [Keyboard keys support](#keyboard-keys-support)
+      * [Slider buttons](#slider-buttons)
+      * [CSS transitions](#css-transitions)
+      * [Vertical slider](#vertical-slider)
+      * [Items of varied width or height / beforeSlide callback](#items-of-varied-width-or-height--beforeslide-callback)
+
 ## Options
 
 Here's a list of all the supported options, with their default values:
 
 ```javascript
 var options = {
-    // Selectors for the slider buttons. These must be strings. jQuery objects of the actual buttons are not supported.
-    // This provides better performance and also allows for dynamic adding/removal of slider buttons.
+    // Selectors for the slider buttons. These must be strings. jQuery objects
+    // of the actual buttons are not supported. This provides better performance
+    // and also allows for dynamic adding/removal of slider buttons.
     up: '.up',
     right: '.right',
     down: '.down',
@@ -16,36 +35,43 @@ var options = {
     next: '.next',
     first: '.first',
     last: '.last',
-    // The class added to the above buttons when the button has a disabled state. May also be null or empty string,
+    // The class added to the above buttons when the button has a disabled state.
+    // May also be null or empty string,
     disabledButtonsClass: 'disabled',
-    // Whether to restart the slider when it reaches an item at the edge (first or last even in a grid).
-    // If this is `true`, the slider buttons will not have a disabled state and the `disabledButtonsClass` is ignored
+    // Whether to restart the slider when it reaches an item at the edge (first
+    // or last even in a grid). If this is `true`, the slider buttons will not
+    // have a disabled state and the `disabledButtonsClass` is ignored
     rewind: false,
     // Whether or not it can be controlled by keyboard arrows
     keyboardArrowKeys: false,
-    // An lement whose children (or specified by `pageSelector`) are the actual slider pages. Also accepts a jQuery object.
+    // An lement whose children (or specified by `pageSelector`) are the actual
+    // slider pages. Also accepts a jQuery object.
     pageContainer: '> ul',
-    // If null, the children of `pageContainer` are assumed to be the pages. Else, this selector is applied on `pageContainer` to find the pages.
+    // If null, the children of `pageContainer` are assumed to be the pages.
+    // Else, this selector is applied on `pageContainer` to find the pages.
     pageSelector: null,
     // How many items represent a page?
     itemsPerPage: 1,
-    // An index to transition to after the slider is initialized. Note that this is zero-based.
+    // An index to transition to after the slider is initialized. Note that this
+    // is zero-based.
     // TODO: add support for initialCoordinates as well (i.e. row and column).
     initialIndex: 0,
-    // Whether to use CSS transitions or not. If this is `true`, `jQueryAnimation` is ignored.
+    // Whether to use CSS transitions or not. If this is `true`, `jQueryAnimation`
+    // is ignored.
     cssTransitions: false,
-    // Whether to use jQuery animations or not. If this is `false` and `cssTransitions` is false, then the page will
-    // be transitioned to without any animation.
+    // Whether to use jQuery animations or not. If this is `false` and `cssTransitions`
+    // is false, then the page will be transitioned to without any animation.
     jQueryAnimation: true,
     // Animation speed passed to jQuery().animate() if `jQueryAnimation` is `true`.
     jQueryAnimationSpeed: 400,
     // Animation easing passed to jQuery().animate() if `jQueryAnimation` is `true`.
     jQueryAnimationEasing: 'swing',
-    // A function to be called before transitioning to a page. It's passed an `index` (zero-based) of the page
-    // being transitioned to. If this function returns false, the transition is not performed.
+    // A function to be called before transitioning to a page. It's passed an
+    // `index` (zero-based) of the page being transitioned to. If this function
+    // returns false, the transition is not performed.
     beforeSlide: $.noop,
-    // A function to be called after transitioning to a page. It's passed an `index` (zero-based) of the page
-    // that was transitioned to.
+    // A function to be called after transitioning to a page. It's passed an
+    // `index` (zero-based) of the page that was transitioned to.
     afterSlide: $.noop
 };
 ```
