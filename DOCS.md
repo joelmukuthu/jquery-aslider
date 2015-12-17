@@ -2,56 +2,120 @@
 
 ## Options
 
-* `next: '.next'` - jQuery selector for the next (or down, in the case of a vertical slider) button. Also accepts a jQuery object.
-* `prev: '.prev'` - jQuery selector for the previous (or up, in the case of a vertical slider) button. Also accepts a jQuery object.
-* `pageHolder: '> ul'` - jQuery selector for the element whose children (or specified by `pageSelector`) are the actual pages. Also accepts a jQuery object
-* `pageSelector: null` - jQuery selector which specifies the slider's pages or items. If null, the children of `pageHolder` are assumed to be the pages. This selector is applied in the scope of `pageHolder`
-* `itemsPerPage: 1`
-* `initialIndex: 0`
-* `behaviourAtEdge: 'none'` - allowed: `reset`, `none`. Specifies what to do after the last item has been reached. `reset` takes the slider back to the other edge (beginning or end) while `none` does nothing but if `disabledClass` has been provided it adds this class to the button which is no longer active.
-* `disabledClass: 'disabled'` - if `behaviourAtEdge` is `none`, this class is added to the button that is now inactive
-* `beforeSlide: null` - a callback to be exectuted before sliding. It receives the index being seeked to as the only parameter. May also be provided after initializing the slider. Within the scope of this function, `this` represents the api (refer to the Methods section for more info).
-* `afterSlide: null` - a callback to be exectuted after sliding. It receives the newly current index as the only parameter. May also be provided after initializing the slider. Within the scope of this function, `this` represents the api (refer to the Methods section for more info).
-* `animation: true` - whether or not to animate the sliding i.e. use `$().animate` or simply set the CSS property. Note that if `property` is set to `transform` then this is treated as `false`.
-* `slideSpeed: 400` - speed for `$().animate`
-* `easing: 'swing'` - easing for `$().animate`
-* `property: 'position'` - allowed: `position` and `transform`. If set to `transform`, the plugin will not animate the sliding at all so combine this with CSS transitions instead
-* `keys: false` - whether or not sliders can be controlled by keyboard left/right/up/down arrows. Note that the keys will control *all* the sliders on a page, unless some element e.g. a form input has focus. If you have several slider instances and only want to enable keys on one of them then initiate them separately and set `keys` to be `true` only for the one slider.
+Here's a list of all the supported options, with their default values:
 
-## Methods
+```javascript
+var options = {
+    // Selectors for the slider buttons. These must be strings. jQuery objects of the actual buttons are not supported.
+    // This provides better performance and also allows for dynamic adding/removal of slider buttons.
+    up: '.up',
+    right: '.right',
+    down: '.down',
+    left: '.left',
+    previous: '.previous',
+    next: '.next',
+    first: '.first',
+    last: '.last',
+    // The class added to the above buttons when the button has a disabled state. May also be null or empty string,
+    disabledButtonsClass: 'disabled',
+    // Whether to restart the slider when it reaches an item at the edge (first or last even in a grid).
+    // If this is `true`, the slider buttons will not have a disabled state and the `disabledButtonsClass` is ignored
+    rewind: false,
+    // Whether or not it can be controlled by keyboard arrows
+    keyboardArrowKeys: false,
+    // An lement whose children (or specified by `pageSelector`) are the actual slider pages. Also accepts a jQuery object.
+    pageContainer: '> ul',
+    // If null, the children of `pageContainer` are assumed to be the pages. Else, this selector is applied on `pageContainer` to find the pages.
+    pageSelector: null,
+    // How many items represent a page?
+    itemsPerPage: 1,
+    // An index to transition to after the slider is initialized. Note that this is zero-based.
+    // TODO: add support for initialCoordinates as well (i.e. row and column).
+    initialIndex: 0,
+    // Whether to use CSS transitions or not. If this is `true`, `jQueryAnimation` is ignored.
+    cssTransitions: false,
+    // Whether to use jQuery animations or not. If this is `false` and `cssTransitions` is false, then the page will
+    // be transitioned to without any animation.
+    jQueryAnimation: true,
+    // Animation speed passed to jQuery().animate() if `jQueryAnimation` is `true`.
+    jQueryAnimationSpeed: 400,
+    // Animation easing passed to jQuery().animate() if `jQueryAnimation` is `true`.
+    jQueryAnimationEasing: 'swing',
+    // A function to be called before transitioning to a page. It's passed an `index` (zero-based) of the page
+    // being transitioned to. If this function returns false, the transition is not performed.
+    beforeSlide: $.noop,
+    // A function to be called after transitioning to a page. It's passed an `index` (zero-based) of the page
+    // that was transitioned to.
+    afterSlide: $.noop
+};
+```
+These options can be overriden when creating a new slider instance, for example:
+```javascript
+$('.slider').aslider({
+    rewind: true,
+    keyboardArrowKeys: true,
+    cssTransitions: true,
+    beforeSlide: function (index) {
+        console.log('transitioning to page', index);
+    }
+});
+```
 
-For all these methods, `this` represents the api itself so, for example, you can do `this.getCurrentIndex()` within the `next` function.
+## API Methods
 
-#### Control callbacks:
+The API can be accessed by querying the element's data using `jQuery().data()`, for example:
+```javascript
+var slider = $('.slider').aslider({
+    rewind: true,
+    keyboardArrowKeys: true,
+    cssTransitions: true,
+    beforeSlide: function (index) {
+        console.log('transitioning to page', index);
+    }
+});
+var api = slider.data('aslider');
+// api.next(); // transition to the next page
+```
+For all the API methods, `this` represents the api itself so, for example, you can do `this.getIndex()` within the `next` function.
 
-* `afterSlide: function ([callback])` - used to either set a new afterSlide callback or to call the currently set callback, if any 
-* `beforeSlide: function ([callback])` - used to either set a new afterSlide callback or to call the currently set callback, if any 
+#### Disable/enable:
 
-#### Control sliding:
+* `disable()` - used to disable a slider instance so that the slider buttons, keyboard keys and API methonds don't work for that instance
+* `enable()` - used to re-enable a slider instance that was previously disabled.
 
-These methods accept an optional callback that is executed after the sliding is finished. Note that even if there's an `afterSlide` callback already set, this callback will be executed instead. Also for this callback, `this` represents the api itself.
+#### Control transitioning:
 
-* `first: function ([callback])` - slide to the first item
-* `last: function ([callback])` - slide to the last item
-* `prev: function ([callback])` - slide to the previous item
-* `next: function ([callback])` - slide to the next item
-* `seek: function (index, [callback])` - slide to a certain index. if index is out of bounds this will do nothing
+These methods accept an optional callback that is executed after the sliding is finished. Note that even if there's an `afterSlide` callback already set, this callback will be executed instead.
+
+* `seek: function (index, [callback])` - transition to a certain (zero-based) index. If the index is out of bounds this will do nothing.
+* `up([callback])` - transition up
+* `right([callback])` - transition right
+* `down([callback])` - transition down
+* `left([callback])` - transition left
+* `previous([callback])` - transition to the previous page
+* `next([callback])` - transition to the next page
+* `first([callback])` - transition to the first page
+* `last([callback])` - transition to the last page
+
+Some of these methods do the same thing and are just aliases for each other. For example, in a horizontal slider, `next()` and `right()` do the same thing. Essentially, they all build upon `seek()`.
 
 #### Getters
-* `getCurrentIndex: function ()`
-* `getOptions: function ()` - returns the options object
-* `getPageCount: function ()`
-* `getPageHolder: function ()`
-* `getPages: function ()`
-* `getVersion: function ()` - returns current plugin version
+* `getIndex()` - returns the current index
 
 #### Low level
-* `off: function ([alsoDisableApiMethods = true])` - turns off the event listeners on the prev, next buttons and disables keyboard keys. If `alsoDisableApiMethods` is `true` (default), this also disables the api methods so that e.g. calling any of the api methods (*except these low-level methods*) won't work. Note that you can call `on` later on to enable the event listeners and api methods.
-* `on: function ([alsoEnableApiMethods = true])`  - turns on the event listeners on the prev, next buttons and enables keyboard keys *if* they were previously disabled. If `alsoEnableApiMethods` is `true` (default), this also enables the api methods.
-* `isOff: function ()` - whether or not the slider is off
-* `isOn: function ()` - whether or not the slider is on
-* `methodsDisabled: function ()` - whether or not the api methods are disabled
-* `methodsEnabled: function ()` - whether or not the api methods are enabled
+These are private methods and normally you would not need to use them.
+* `_getPages()`
+* `_getPageCount()`
+* `_getColumnCount()`
+* `_getRowCount()`
+* `_isValid(index)`
+* `_getIndex(coordinates)` - `coordinates` is an object with a zero-based grid position, such as `{ row: 0, column: 0 }`
+* `_getCoordinates(index)` - returns an object such as `{ row: 0, column: 0 }`
+* `_getCss(index)` - returns an object such as `{ top: '-100%', left: '200%' }`
+* `_updateButtonStates` - adds/removes the `disabledButtonsClass` to/from the slider buttons
+* `_slide(index, [callback])` - performs the actual sliding
+* `_registerEvents` - adds `click` listeners for the slider buttons and `keydown` listeners for the keyboard arrow keys if configured to do so
+* `_deregisterEvents` - removes the `click` and `keydown` listeners
 
 ## Examples
 
@@ -68,16 +132,16 @@ HTML:
     </ul>
 </div>
 ```
-    
+
 CSS:
 
 ```css
-.slider { 
+.slider {
     position: relative; /* 1 */
     overflow: hidden; /* 1 */
 }
 
-.slider ul { 
+.slider ul {
     position: absolute; /* 1 */
     width: 300%; /* 2 */
     list-style: none; /* 3 */
@@ -85,7 +149,7 @@ CSS:
     padding: 0; /* 3 */
 }
 
-.slider li { 
+.slider li {
     float: left; /* 3 */
     width: 33.33%; /* 2 */
 }
@@ -97,7 +161,7 @@ CSS:
 1 - required,
 2 - make it responsive,
 3 - aesthetics
-    
+
 JavaScript:
 
 ```javascript
@@ -110,11 +174,11 @@ Building on the minimal setup, update the JS as follows:
 
 ```javascript
 $('.slider').aslider({
-    keys: true
+    keyboardArrowKeys: true
 });
 ```
 
-### Prev/next buttons
+### Slider buttons
 
 Update the HTML and CSS as follows:
 
@@ -128,8 +192,8 @@ HTML:
         <li>three</li>
     </ul>
     <p>
-        <!-- since initial index is 0, prev starts off as disabled -->
-        <a class="prev disabled" href="#">Prev</a>
+        <!-- since initial index is 0, a.previous starts off as disabled -->
+        <a class="previous disabled" href="#">Prev</a>
         <a class="next" href="#">Next</a>
     </p>
 </div>
@@ -138,22 +202,22 @@ HTML:
 CSS:
 
 ```css
-.slider p { 
-    position: absolute; 
+.slider p {
+    position: absolute;
     bottom: 0;
     margin: 0;
     width: 98%; /* 1 */
     padding: 0.5em 1%; /* 1 */
 }
-.slider .prev { 
-    float: left; 
+.slider .prev {
+    float: left;
 }
-.slider .next { 
-    float: right; 
+.slider .next {
+    float: right;
 }
-.slider .disabled { 
-    color: silver; 
-    cursor: default; 
+.slider .disabled {
+    color: silver;
+    cursor: default;
 }
 ```
 1 - makes it responsive, the rest is just aesthetics
@@ -169,16 +233,13 @@ Update the CSS and JS as follows:
 CSS:
 
 ```css
-.slider ul { 
+.slider ul {
     position: absolute;
     width: 300%;
     list-style: none;
     margin: 0;
     padding: 0;
     -webkit-transition: -webkit-transform 400ms ease-in-out;
-    -moz-transition: -moz-transform 400ms ease-in-out; 
-    -ms-transition: -ms-transform 400ms ease-in-out; 
-    -o-transition: -o-transform 400ms ease-in-out;
     transition: transform 400ms ease-in-out;
 }
 ```
@@ -187,8 +248,8 @@ JS:
 
 ```javascript
 $('.slider').aslider({
-    keys: true,
-    property: 'transform'
+    keyboardArrowKeys: true,
+    cssTransitions: true
 });
 ```
 
@@ -196,12 +257,12 @@ You can detect broweser capabilities and enable CSS animations accordingly, e.g.
 
 ```javascript
 $('.slider').aslider({
-    keys: true,
-    property: Modernizr.csstransitions ? 'transform' : 'position'
+    keyboardArrowKeys: true,
+    cssTransitions: Modernizr.csstransitions
 });
 ```
 
-### Vertical
+### Vertical slider
 
 No extra configuration is needed for the plugin to support vertical sliders.
 
@@ -220,24 +281,24 @@ HTML:
     </ul>
 </div>
 ```
-    
+
 CSS:
 
 ```css
-.slider { 
+.slider {
     position: relative; /* 1 */
     overflow: hidden; /* 1 */
     height: 40px;
 }
 
-.slider ul { 
+.slider ul {
     position: absolute; /* 1 */
     list-style: none; /* 3 */
     margin: 0; /* 3 */
     padding: 0; /* 3 */
 }
 
-.slider li { 
+.slider li {
     height: 40px;
 }
 
@@ -249,17 +310,17 @@ CSS:
     overflow: hidden; /* 3 */
 }
 
-.slider .up { 
+.slider .up {
     width: 50%; /* 3 */
     display: block; /* 3 */
     float: left; /* 3 */
 }
-.slider .down { 
+.slider .down {
     width: 50%; /* 3 */
     display: block; /* 3 */
     float: right; /* 3 */
 }
-.slider .disabled { 
+.slider .disabled {
     color: silver; /* 3 */
     cursor: default; /* 3 */
 }
@@ -269,16 +330,9 @@ CSS:
 
 JS:
 
-```javascript
-$('.slider').aslider({
-    keys: true,
-    property: Modernizr.csstransitions ? 'transform' : 'position',
-    prev: 'a.up',
-    next: 'a.down'
-});
-```
+No need to update JS, it’ll use the defaults.
 
-### Items of varied width or height / beforeSlide
+### Items of varied width or height / beforeSlide callback
 
 The trick is to use the `beforeSlide` function to update pageSize accordingly. Example with a vertical slider:
 
@@ -301,15 +355,15 @@ HTML:
 ```javascript
 var slider = $('.slider'),
     initialHeight = slider.height();
+
 slider.aslider({
-    keys: true,
-    property: Modernizr.csstransitions ? 'transform' : 'position',
-    prev: 'a.up',
-    next: 'a.down',
+    keyboardArrowKeys: true,
+    cssTransitions: Modernizr.csstransitions,
     beforeSlide: function (index) {
-        var pages = this.getPages(),
+        var pages = this._getPages(),
             next = pages.eq(index),
             height = next.outerHeight();
+
         if (height < intialHeight) {
             height = initialHeight;
         }
@@ -317,15 +371,3 @@ slider.aslider({
     }
 });
 ```
-
-## Version - 1.1
-
-Current version: 1.1
-
-## License
-
-[The MIT License](LICENSE.md)
-
-## Contributing
-
-Fork, update and submit a pull request.

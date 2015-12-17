@@ -41,6 +41,7 @@
 
     this.enable();
 
+    // TODO: add support for initialCoordinates
     if (this._isValid(options.initialIndex)) {
       this.seek(options.initialIndex);
     }

@@ -4,14 +4,15 @@ slider plugin for jQuery, supports CSS animations and grid transitions. [Demo](h
 
 ## Features
 
-* Supports CSS animations as well animating using jQuery i.e. by left or top properties
-* Supports grid transitions - vertical/horizontal/diagonal. automatically detects what row and column an item is in when transitioning to it
-* Plays nice with responsive designs - doesn't add any CSS to make the elements responsive but doesn't interfere with it either
-* The slider items must not be of the same size. This comes in handy especially for vertical sliders
-* provides an API for you to programmatically initiate sliding, among other functions
-* No extra CSS is added to the elements, besides one of `transform`, `left` or `top`
-* Supports previous/next (up/down) buttons
-* Supports keyboard navigation, using the arrow keys
+* Supports CSS transitions as well as jQuery animations (which ideally should be used only as a fallback)
+* Supports grid (vertical, horizontal and diagonal) transitions. It calculates what row and column an item is on when transitioning to it.
+* Plays nice with responsive designs. It doesn't add any CSS to make the elements responsive but doesn't interfere with those styles either.
+* Supports items (pages) of unequal sizes. This is especially nice for vertical sliders.
+* Provides an API for you to programmatically initiate transitioning to an item, for instance for adding touch support.
+* Does not add unnecessary CSS to the elements, besides `transform`, `left` and `top` properties which are required for the transitioning.
+* Has built in support for up, down, left, right, previous, next, first and last buttons (even their disabled states).
+* Has built in support for keyboard navigation using the arrow keys.
+* Supports before and after-slide callbacks.
 
 ## Installation
 Install with bower:
@@ -26,7 +27,7 @@ Or simply download the [latest release](https://github.com/joelmukuthu/jquery-as
 
 ## Usage
 
-First, include jQuery and jquery-aslider on your page. To have a functional slider:
+First, include jQuery and jquery-aslider on your page. Then to create a slider:
 
 HTML:
 
