@@ -1,4 +1,4 @@
-# jquery-aslider [![Bower version](https://badge.fury.io/bo/jquery-aslider.svg)](http://badge.fury.io/bo/jquery-aslider)
+# jquery-aslider [![Bower version](https://badge.fury.io/bo/jquery-aslider.svg)](http://badge.fury.io/bo/jquery-aslider) [![NPM version](https://badge.fury.io/js/jquery-aslider.svg)](http://badge.fury.io/js/jquery-aslider)
 
 slider plugin for jQuery, supports CSS animations and grid transitions. [Demo](http://joelmukuthu.github.io/jquery-aslider/)
 
@@ -39,16 +39,16 @@ HTML:
     </ul>
 </div>
 ```
-    
+
 CSS:
 
 ```css
-.slider { 
+.slider {
     position: relative; /* 1 */
     overflow: hidden; /* 1 */
 }
 
-.slider ul { 
+.slider ul {
     position: absolute; /* 1 */
     width: 300%; /* 2 */
     list-style: none; /* 3 */
@@ -56,7 +56,7 @@ CSS:
     padding: 0; /* 3 */
 }
 
-.slider li { 
+.slider li {
     float: left; /* 3 */
     width: 33.33%; /* 2 */
 }
@@ -68,7 +68,7 @@ CSS:
 1 - required,
 2 - make it responsive,
 3 - aesthetics
-    
+
 JavaScript:
 
 ```javascript
