@@ -339,7 +339,7 @@
   Slider.prototype.up = function(callback) {
     var coordinates = this._getCoordinates(this.index);
 
-    if (coordinates.row < 0) {
+    if (coordinates.row - 1 < 0) {
       if (this.rewind) {
         coordinates.row = this._getRowCount() - 1;
       } else {
@@ -356,7 +356,7 @@
     var coordinates = this._getCoordinates(this.index);
     var columnCount = this._getColumnCount();
 
-    if (coordinates.column > columnCount - 1) {
+    if (coordinates.column + 1 > columnCount - 1) {
       if (this.rewind) {
         coordinates.column = 0;
       } else {
@@ -373,7 +373,7 @@
     var coordinates = this._getCoordinates(this.index);
     var rowCount = this._getRowCount();
 
-    if (coordinates.row > rowCount - 1) {
+    if (coordinates.row + 1 > rowCount - 1) {
       if (this.rewind) {
         coordinates.row = 0;
       } else {
@@ -389,7 +389,7 @@
   Slider.prototype.left = function(callback) {
     var coordinates = this._getCoordinates(this.index);
 
-    if (coordinates.column < 0) {
+    if (coordinates.column - 1 < 0) {
       if (this.rewind) {
         coordinates.column = this._getColumnCount() - 1;
       } else {
