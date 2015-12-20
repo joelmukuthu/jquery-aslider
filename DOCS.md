@@ -69,9 +69,11 @@ var options = {
     // A function to be called before transitioning to a page. It's passed an
     // `index` (zero-based) of the page being transitioned to. If this function
     // returns false, the transition is not performed.
+    // Within the scope of this function, `this` references the API.
     beforeSlide: $.noop,
     // A function to be called after transitioning to a page. It's passed an
     // `index` (zero-based) of the page that was transitioned to.
+    // Within the scope of this function, `this` references the API.
     afterSlide: $.noop
 };
 ```
@@ -111,7 +113,7 @@ For all the API methods, `this` represents the api itself so, for example, you c
 
 #### Control transitioning:
 
-These methods accept an optional callback that is executed after the sliding is finished. Note that even if there's an `afterSlide` callback already set, this callback will be executed instead.
+These methods accept an optional callback that is executed after the sliding is finished. Note that even if there's an `afterSlide` callback already set, this callback will be executed instead. Within the scope of the callback function, `this` references the API.
 
 * `seek: function (index, [callback])` - transition to a certain (zero-based) index. If the index is out of bounds this will do nothing.
 * `up([callback])` - transition up

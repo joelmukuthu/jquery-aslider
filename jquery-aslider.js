@@ -36,8 +36,8 @@
 
     this.rewind = options.rewind;
 
-    this.beforeSlide = options.beforeSlide;
-    this.afterSlide = options.afterSlide;
+    this.beforeSlide = options.beforeSlide.bind(this);
+    this.afterSlide = options.afterSlide.bind(this);
 
     this.enable();
 
@@ -287,6 +287,7 @@
       }
 
       var cb = $.isFunction(callback) ? callback : slider.afterSlide;
+      cb = cb.bind(slider);
       cb(slider.index);
     }
 
@@ -476,7 +477,7 @@
       throw new Error('itemsPerPage should be an integer');
     }
 
-    // TODO: Validate other options e.g. jQueryAnimationSpeed?
+    // TODO: Validate other options?
 
     var sliders = this;
     return sliders.each(function (i) {
