@@ -9,7 +9,7 @@
             .slider li:nth-child(odd) { background: #F6F4F0; }
             .slider li:nth-child(even) { background: #cdcdcd; }
             .slider .ctrls { position: absolute; bottom: 0; width: 98%; margin: 0; padding: 0.5em 1%; }
-            .slider .prev { float: left; }
+            .slider .previous { float: left; }
             .slider .next { float: right; }
             .slider .disabled { color: silver; cursor: default; }
         </style>
@@ -22,7 +22,7 @@
                 <li>three</li>
             </ul>
             <p class="ctrls">
-                <a class="prev" href="#">Prev</a>
+                <a class="previous" href="#">Prev</a>
                 <a class="next" href="#">Next</a>
             </p>
         </div>
@@ -33,7 +33,7 @@
                 <li>three</li>
             </ul>
             <p class="ctrls">
-                <a class="prev" href="#">Prev</a>
+                <a class="previous" href="#">Prev</a>
                 <a class="next" href="#">Next</a>
             </p>
         </div>
@@ -54,12 +54,11 @@
                         console.log('index after slide:', currentIndex);
                     }
                 });
-                var api = sliders
-                    .first()
-                    .data('aslider')
-                    .next(function (index) {
-                        console.log('this callback is executed instead of regular afterSlide.. index after slide is', index);
-                    });
+
+                var firstSliderApi = sliders.first().data('aslider');
+                firstSliderApi.next(function (index) {
+                    console.log('this callback is executed instead of regular afterSlide.. index after slide is', index);
+                });
             });
         </script>
     </body>
