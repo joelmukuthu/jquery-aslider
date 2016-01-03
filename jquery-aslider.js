@@ -1,3 +1,8 @@
+/**
+ * jquery-aslider [https://github.com/joelmukuthu/jquery-aslider]
+ * (c) 2014-2016 Joel Mukuthu, MIT License
+ **/
+
 (function ($) {
   'use strict';
 
