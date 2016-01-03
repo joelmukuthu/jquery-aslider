@@ -276,21 +276,18 @@
   };
 
   Slider.prototype._slide = function(index, callback) {
-    var css = this._getCss(index);
-    var slider = this;
+    var done = function () {
+      var cb = $.isFunction(callback) ? callback : this.afterSlide;
+      cb.call(this, this.index);
+    }.bind(this);
 
-    function done() {
-      slider.index = index;
+    this.index = index;
 
-      if (!slider.rewind && slider.disabledButtonsClass) {
-        slider._updateButtonStates();
-      }
-
-      var cb = $.isFunction(callback) ? callback : slider.afterSlide;
-      cb = cb.bind(slider);
-      cb(slider.index);
+    if (!this.rewind && this.disabledButtonsClass) {
+      this._updateButtonStates();
     }
 
+    var css = this._getCss(this.index);
     if (this.cssTransitions) {
       this.pageContainer.css({
         transform: 'translate(' + css.left + ', ' + css.top + ')'
