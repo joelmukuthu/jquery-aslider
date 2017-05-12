@@ -1,4 +1,6 @@
 # jquery-aslider
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/joelmukuthu/jquery-aslider.svg)](https://greenkeeper.io/)
 [![Dependency Status](https://david-dm.org/joelmukuthu/jquery-aslider.svg)](https://david-dm.org/joelmukuthu/query-aslider) [![Licence](https://img.shields.io/npm/l/jquery-aslider.svg?maxAge=2592000)]() [![Bower version](https://img.shields.io/bower/v/jquery-aslider.svg?maxAge=2592000)]() [![npm version](https://img.shields.io/npm/v/jquery-aslider.svg?maxAge=2592000)]()
 
 slider plugin for jQuery, supports CSS animations and grid transitions. [Demo](http://joelmukuthu.github.io/jquery-aslider/)
